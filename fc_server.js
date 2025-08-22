@@ -28,7 +28,7 @@ const wss = new WebSocket.Server({ server, clientTracking: true });
 
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, '../web_client')));
+app.use(express.static(path.join(__dirname)));
 
 const fc_activeConnections = new Map();
 const fc_onlineUsers = new Set();
