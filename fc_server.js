@@ -331,8 +331,8 @@ app.post('/api/login', (req, res) => {
         res.cookie('fc_session', result.sessionId, {
             httpOnly: true,
             maxAge: 30 * 24 * 60 * 60 * 1000,
-            sameSite: 'Strict',
-            secure: process.env.NODE_ENV === 'production'
+            sameSite: 'Lax',
+            secure: false
         });
     }
     
