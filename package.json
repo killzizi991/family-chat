@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": "22.18.0" // Замените на вашу версию Node.js (узнать можно командой node -v)
+    "node": "22.18.0"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
