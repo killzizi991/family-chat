@@ -1,0 +1,4 @@
+node_modules/
+fc_chat.db
+fc_auth_data.json
+.env

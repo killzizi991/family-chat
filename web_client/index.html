@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FamilyChat v0.1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' ws:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws:;">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="fc_loginForm">
+        <h2>Вход</h2>
+        <form>
+            <label for="fc_loginUsername">Имя пользователя:</label>
+            <input type="text" id="fc_loginUsername" required>
+            
+            <label for="fc_loginCode">Код доступа:</label>
+            <input type="text" id="fc_loginCode" required>
+            
+            <button type="submit">Войти</button>
+        </form>
+        <p>Нет аккаунта? <a href="#" id="fc_registerLink">Зарегистрироваться</a></p>
+    </div>
+    
+    <div id="fc_registerForm" style="display:none">
+        <h2>Регистрация</h2>
+        <form>
+            <label for="fc_registerUsername">Имя пользователя:</label>
+            <input type="text" id="fc_registerUsername" required>
+            
+            <label for="fc_registerCode">Код доступа (5 цифр):</label>
+            <input type="text" id="fc_registerCode" required>
+            
+            <button type="submit">Зарегистрироваться</button>
+        </form>
+        <p><a href="#" id="fc_backToLogin">Назад к входу</a></p>
+    </div>
+    
+    <div id="fc_chatContainer" style="display:none">
+        <div id="fc_sidebar" class="active">
+            <div id="fc_sidebarHeader">
+                <h3>Чаты</h3>
+                <span id="fc_collapseSidebar" class="collapse-icon">←</span>
+            </div>
+            <div id="fc_chatsContainer">
+                <!-- Чаты будут загружены динамически -->
+            </div>
+        </div>
+        
+        <div id="fc_mainChat">
+            <div id="fc_chatHeader">
+                <button id="fc_menuToggle">☰</button>
+                <span id="fc_chatTitle">Выберите чат</span>
+                <span>Вы вошли как: <span id="fc_currentUser"></span></span>
+                <button id="fc_logoutButton">Выйти</button>
+            </div>
+            
+            <div id="fc_messages">
+                <div class="system-msg">Выберите пользователя, с которым хотите пообщаться</div>
+            </div>
+            
+            <div id="fc_inputArea">
+                <input type="text" id="fc_messageInput" placeholder="Введите сообщение">
+                <button id="fc_sendButton">Отправить</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="fc_core.js"></script>
+    <script src="fc_ui.js"></script>
+</body>
+</html>

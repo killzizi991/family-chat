@@ -1,0 +1,23 @@
+{
+  "name": "familychat",
+  "version": "0.1.0",
+  "description": "A simple family chat app",
+  "main": "fc_server.js",
+  "scripts": {
+    "start": "node fc_server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": "22.18.0" // Замените на вашу версию Node.js (узнать можно командой node -v)
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.5.2",
+    "sqlite3": "^5.1.6",
+    "ws": "^8.16.0"
+  }
+}
