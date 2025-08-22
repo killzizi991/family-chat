@@ -339,14 +339,20 @@ window.familyChat = window.familyChat || {};
                 await familyChat.ui.handleLogin();
             });
             
-            // Добавляем обработчик клика на кнопку входа
-            const loginButton = loginForm.querySelector('button[type="submit"]');
-            if (loginButton) {
-                loginButton.addEventListener('click', async (e) => {
+            // Добавляем обработчики для полей ввода в форме логина
+            document.getElementById('fc_loginUsername').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
                     e.preventDefault();
-                    await familyChat.ui.handleLogin();
-                });
-            }
+                    familyChat.ui.handleLogin();
+                }
+            });
+            
+            document.getElementById('fc_loginCode').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    familyChat.ui.handleLogin();
+                }
+            });
             
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -435,25 +441,35 @@ window.familyChat = window.familyChat || {};
             const username = document.getElementById('fc_loginUsername').value;
             const code = document.getElementById('fc_loginCode').value;
             
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, code })
-            });
+            if (!username || !code) {
+                alert('Заполните все поля');
+                return;
+            }
             
-            const result = await response.json();
-            if (result.success) {
-                familyChat.currentUser = username;
-                document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
-                familyChat.initWebSocket();
-                document.getElementById('fc_loginForm').style.display = 'none';
-                document.getElementById('fc_registerForm').style.display = 'none';
-                document.getElementById('fc_chatContainer').style.display = 'flex';
-                document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
-                await familyChat.ui.initChatList();
-                familyChat.loadChatHistory();
-            } else {
-                alert(`Ошибка: ${result.message}`);
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, code })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    familyChat.currentUser = username;
+                    document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
+                    familyChat.initWebSocket();
+                    document.getElementById('fc_loginForm').style.display = 'none';
+                    document.getElementById('fc_registerForm').style.display = 'none';
+                    document.getElementById('fc_chatContainer').style.display = 'flex';
+                    document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
+                    await familyChat.ui.initChatList();
+                    familyChat.loadChatHistory();
+                } else {
+                    alert(`Ошибка: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Ошибка входа:', error);
+                alert('Произошла ошибка при входе. Проверьте консоль для подробностей.');
             }
         }
     };
