@@ -256,6 +256,11 @@ window.familyChat = window.familyChat || {};
                 if (window.innerWidth > 768) {
                     sidebar.classList.add('collapsed');
                 }
+                
+                // Обновляем видимость кнопок звонка
+                if (familyChat.webrtc) {
+                    familyChat.webrtc.updateCallButtonsVisibility();
+                }
             });
             chatsContainer.appendChild(groupChat);
     
@@ -309,6 +314,11 @@ window.familyChat = window.familyChat || {};
                     sidebar.classList.remove('active');
                     if (window.innerWidth > 768) {
                         sidebar.classList.add('collapsed');
+                    }
+                    
+                    // Обновляем видимость кнопок звонка
+                    if (familyChat.webrtc) {
+                        familyChat.webrtc.updateCallButtonsVisibility();
                     }
                 });
                 chatsContainer.appendChild(userElement);
@@ -464,6 +474,11 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
                     await familyChat.ui.initChatList();
                     familyChat.loadChatHistory();
+                    
+                    // Обновляем видимость кнопок звонка после входа
+                    if (familyChat.webrtc) {
+                        familyChat.webrtc.updateCallButtonsVisibility();
+                    }
                 } else {
                     alert(`Ошибка: ${result.message}`);
                 }

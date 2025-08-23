@@ -38,6 +38,11 @@ window.familyChat = {
                 document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы вошли как ' + familyChat.currentUser + '</div>';
                 await familyChat.ui.initChatList();
                 familyChat.loadChatHistory();
+                
+                // Обновляем видимость кнопок звонка после проверки сессии
+                if (familyChat.webrtc) {
+                    familyChat.webrtc.updateCallButtonsVisibility();
+                }
             }
         };
         
@@ -316,6 +321,7 @@ window.familyChat = {
         // Инициализация WebRTC
         if (!familyChat.webrtc) {
             familyChat.webrtc = new FamilyChatWebRTC();
+            familyChat.webrtc.updateCallButtonsVisibility();
         }
         
         familyChat.checkSession();
