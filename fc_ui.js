@@ -185,6 +185,7 @@ window.familyChat = window.familyChat || {};
         },
         
         updateOnlineStatus: function(onlineUsers) {
+            familyChat.onlineUsers = onlineUsers;
             const chatItems = document.querySelectorAll('.chat-item[data-username]');
             chatItems.forEach(item => {
                 const username = item.dataset.username;
@@ -196,6 +197,7 @@ window.familyChat = window.familyChat || {};
                     statusIndicator.classList.remove('online');
                 }
             });
+            this.updateCallButton();
         },
         
         updateUnreadCounts: function(counts) {
@@ -245,6 +247,7 @@ window.familyChat = window.familyChat || {};
                 familyChat.currentChat = { type: 'group', recipient: null };
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
                 familyChat.loadChatHistory();
+                familyChat.ui.updateCallButton();
                 
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.remove('active');
@@ -295,6 +298,7 @@ window.familyChat = window.familyChat || {};
                     };
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
                     familyChat.loadChatHistory();
+                    familyChat.ui.updateCallButton();
                     
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.remove('active');
@@ -449,6 +453,7 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
                     await familyChat.ui.initChatList();
                     familyChat.loadChatHistory();
+                    familyChat.ui.updateCallButton();
                 } else {
                     alert(`Ошибка: ${result.message}`);
                 }
@@ -463,9 +468,11 @@ window.familyChat = window.familyChat || {};
             if (!callButton) return;
             
             const isPrivateChat = familyChat.currentChat.type === 'private';
-            const recipientOnline = familyChat.onlineUsers.includes(familyChat.currentChat.recipient);
+            const recipient = familyChat.currentChat.recipient;
+            const recipientOnline = familyChat.onlineUsers.includes(recipient);
+            const callInProgress = familyChat.webrtc && familyChat.webrtc.callInProgress;
             
-            if (isPrivateChat && recipientOnline && !familyChat.webrtc.callInProgress) {
+            if (isPrivateChat && recipient && recipientOnline && !callInProgress) {
                 callButton.style.display = 'inline-block';
             } else {
                 callButton.style.display = 'none';

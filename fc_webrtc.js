@@ -189,11 +189,15 @@ window.familyChat = window.familyChat || {};
                 document.getElementById('fc_callStatus').textContent = 'Звонок...';
                 document.getElementById('fc_callControls').style.display = 'block';
                 document.getElementById('fc_incomingCall').style.display = 'none';
+                this.callInProgress = true;
             } else if (state === 'active') {
                 document.getElementById('fc_callStatus').textContent = 'Разговор';
                 document.getElementById('fc_callControls').style.display = 'block';
                 document.getElementById('fc_incomingCall').style.display = 'none';
                 this.callInProgress = true;
+            }
+            if (familyChat.ui && familyChat.ui.updateCallButton) {
+                familyChat.ui.updateCallButton();
             }
         },
 
@@ -270,6 +274,10 @@ window.familyChat = window.familyChat || {};
             const remoteAudio = document.getElementById('fc_remoteAudio');
             if (localAudio) localAudio.srcObject = null;
             if (remoteAudio) remoteAudio.srcObject = null;
+            
+            if (familyChat.ui && familyChat.ui.updateCallButton) {
+                familyChat.ui.updateCallButton();
+            }
         }
     };
 
