@@ -162,10 +162,12 @@ window.familyChat = window.familyChat || {};
             };
             
             this.peerConnection.ontrack = (event) => {
-                this.remoteStream = event.streams[0];
-                const remoteVideo = document.getElementById('fc_remoteVideo');
-                if (remoteVideo) {
-                    remoteVideo.srcObject = this.remoteStream;
+                if (event.streams && event.streams[0]) {
+                    this.remoteStream = event.streams[0];
+                    const remoteVideo = document.getElementById('fc_remoteVideo');
+                    if (remoteVideo) {
+                        remoteVideo.srcObject = this.remoteStream;
+                    }
                 }
             };
             
