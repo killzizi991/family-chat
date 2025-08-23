@@ -33,7 +33,6 @@ app.use(express.static(path.join(__dirname)));
 const fc_activeConnections = new Map();
 const fc_onlineUsers = new Set();
 const fc_heartbeatIntervals = new Map();
-const fc_callRequests = new Map();
 
 function fc_authenticate(req, res, next) {
     const sessionId = req.cookies.fc_session;
@@ -295,71 +294,60 @@ wss.on('connection', (ws, req) => {
                     }
                     break;
 
-                case 'call_request':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        fc_callRequests.set(username, {
-                            target: message.target,
-                            timestamp: Date.now()
-                        });
-                        
-                        wss.clients.forEach(client => {
-                            if (fc_activeConnections.get(client) === message.target) {
-                                client.send(JSON.stringify({
-                                    type: 'call_incoming',
-                                    from: username
-                                }));
-                            }
-                        });
-                    }
-                    break;
-                    
-                case 'call_answer':
-                    if (message.response && message.from) {
-                        if (message.response === 'accept') {
-                            wss.clients.forEach(client => {
-                                if (fc_activeConnections.get(client) === message.from) {
-                                    client.send(JSON.stringify({
-                                        type: 'call_accepted',
-                                        target: username
-                                    }));
-                                }
-                            });
-                        } else {
-                            wss.clients.forEach(client => {
-                                if (fc_activeConnections.get(client) === message.from) {
-                                    client.send(JSON.stringify({
-                                        type: 'call_rejected',
-                                        target: username
-                                    }));
-                                }
-                            });
-                        }
-                        fc_callRequests.delete(message.from);
-                    }
-                    break;
-                    
                 case 'webrtc_offer':
                 case 'webrtc_answer':
                 case 'webrtc_ice_candidate':
-                    if (message.target) {
+                    if (message.target && fc_activeConnections.has(ws)) {
+                        const targetUsername = message.target;
                         wss.clients.forEach(client => {
-                            if (fc_activeConnections.get(client) === message.target) {
+                            if (fc_activeConnections.get(client) === targetUsername) {
                                 client.send(JSON.stringify({
                                     type: message.type,
-                                    data: message.data,
-                                    from: username
+                                    from: username,
+                                    data: message.data
                                 }));
                             }
                         });
                     }
                     break;
-                    
-                case 'call_end':
-                    if (message.target) {
+
+                case 'webrtc_call_request':
+                    if (message.target && fc_activeConnections.has(ws)) {
+                        const targetUsername = message.target;
                         wss.clients.forEach(client => {
-                            if (fc_activeConnections.get(client) === message.target) {
+                            if (fc_activeConnections.get(client) === targetUsername) {
                                 client.send(JSON.stringify({
-                                    type: 'call_ended',
+                                    type: 'webrtc_call_request',
+                                    from: username,
+                                    callType: message.callType
+                                }));
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_call_response':
+                    if (message.target && fc_activeConnections.has(ws)) {
+                        const targetUsername = message.target;
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === targetUsername) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_call_response',
+                                    from: username,
+                                    accepted: message.accepted
+                                }));
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_end_call':
+                    if (message.target && fc_activeConnections.has(ws)) {
+                        const targetUsername = message.target;
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === targetUsername) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_end_call',
                                     from: username
                                 }));
                             }

@@ -85,47 +85,29 @@ window.familyChat = {
                             familyChat.ui.markAllMessagesAsRead(message.chatWith);
                             break;
                             
-                        // Обработка WebRTC сообщений
-                        case 'call_incoming':
-                            familyChat.webrtc.handleIncomingCall(message.from);
-                            break;
-                            
-                        case 'call_accepted':
-                            if (familyChat.webrtc.currentCallTarget === message.target) {
-                                familyChat.webrtc.showCallInterface('active');
-                                familyChat.webrtc.isCallActive = true;
-                            }
-                            break;
-                            
-                        case 'call_rejected':
-                            if (familyChat.webrtc.currentCallTarget === message.target) {
-                                familyChat.webrtc.cleanupCall();
-                                alert('Звонок отклонен');
-                            }
-                            break;
-                            
-                        case 'call_ended':
-                            if (familyChat.webrtc.currentCallTarget === message.from) {
-                                familyChat.webrtc.cleanupCall();
-                                alert('Звонок завершен');
-                            }
-                            break;
-                            
                         case 'webrtc_offer':
-                            if (familyChat.webrtc.currentCallTarget === message.from) {
-                                familyChat.webrtc.handleOffer(message.data);
-                            }
-                            break;
-                            
                         case 'webrtc_answer':
-                            if (familyChat.webrtc.currentCallTarget === message.from) {
-                                familyChat.webrtc.handleAnswer(message.data);
+                        case 'webrtc_ice_candidate':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleSignal(message);
                             }
                             break;
                             
-                        case 'webrtc_ice_candidate':
-                            if (familyChat.webrtc.currentCallTarget === message.from) {
-                                familyChat.webrtc.handleIceCandidate(message.data);
+                        case 'webrtc_call_request':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleCallRequest(message);
+                            }
+                            break;
+                            
+                        case 'webrtc_call_response':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleCallResponse(message);
+                            }
+                            break;
+                            
+                        case 'webrtc_end_call':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.endCall();
                             }
                             break;
                             
@@ -330,6 +312,11 @@ window.familyChat = {
             document.getElementById('fc_messages').innerHTML += 
                 '<div class="error">Потеряно интернет-соединение</div>';
         });
+        
+        // Инициализация WebRTC
+        if (!familyChat.webrtc) {
+            familyChat.webrtc = new FamilyChatWebRTC();
+        }
         
         familyChat.checkSession();
     });

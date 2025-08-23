@@ -201,16 +201,19 @@ window.familyChat = window.familyChat || {};
         updateUnreadCounts: function(counts) {
             familyChat.unreadCounts = counts;
             
+            // Обновляем счетчики для личных чатов
             const chatItems = document.querySelectorAll('.chat-item[data-username]');
             chatItems.forEach(item => {
                 const username = item.dataset.username;
                 const count = counts[username] || 0;
                 
+                // Удаляем старый счетчик, если есть
                 const oldBadge = item.querySelector('.unread-badge');
                 if (oldBadge) {
                     oldBadge.remove();
                 }
                 
+                // Добавляем новый счетчик, если есть непрочитанные
                 if (count > 0) {
                     const badge = document.createElement('span');
                     badge.className = 'unread-badge';
@@ -236,6 +239,7 @@ window.familyChat = window.familyChat || {};
             const chatsContainer = document.getElementById('fc_chatsContainer');
             chatsContainer.innerHTML = '';
     
+            // Добавляем групповой чат первым элементом
             const groupChat = document.createElement('div');
             groupChat.className = 'chat-item';
             groupChat.innerHTML = '<span>👥</span> Групповой чат';
@@ -244,9 +248,9 @@ window.familyChat = window.familyChat || {};
             groupChat.addEventListener('click', () => {
                 familyChat.currentChat = { type: 'group', recipient: null };
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
-                document.getElementById('fc_callButton').style.display = 'none';
                 familyChat.loadChatHistory();
                 
+                // Закрываем боковую панель на всех устройствах
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.remove('active');
                 if (window.innerWidth > 768) {
@@ -255,6 +259,7 @@ window.familyChat = window.familyChat || {};
             });
             chatsContainer.appendChild(groupChat);
     
+            // Загружаем пользователей
             const users = await familyChat.fetchUsers();
             users.forEach(user => {
                 const userElement = document.createElement('div');
@@ -265,10 +270,12 @@ window.familyChat = window.familyChat || {};
                 `;
                 userElement.dataset.username = user;
                 
+                // Обновляем статус сразу после создания элемента
                 if (familyChat.onlineUsers.includes(user)) {
                     userElement.querySelector('.online-status').classList.add('online');
                 }
                 
+                // Добавляем счетчик непрочитанных, если есть
                 const unreadCount = familyChat.unreadCounts[user] || 0;
                 if (unreadCount > 0) {
                     const badge = document.createElement('span');
@@ -295,9 +302,9 @@ window.familyChat = window.familyChat || {};
                         recipient: user 
                     };
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
-                    document.getElementById('fc_callButton').style.display = 'inline-block';
                     familyChat.loadChatHistory();
                     
+                    // Закрываем боковую панель на всех устройствах
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.remove('active');
                     if (window.innerWidth > 768) {
@@ -319,6 +326,7 @@ window.familyChat = window.familyChat || {};
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
             
+            // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
                 collapseSidebar.addEventListener('click', () => {
                     const sidebar = document.getElementById('fc_sidebar');
@@ -331,6 +339,7 @@ window.familyChat = window.familyChat || {};
                 await familyChat.ui.handleLogin();
             });
             
+            // Добавляем обработчики для полей ввода в форме логина
             document.getElementById('fc_loginUsername').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -405,19 +414,23 @@ window.familyChat = window.familyChat || {};
                 sidebar.classList.toggle('active');
             });
             
+            // Закрытие меню при клике вне его области
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('fc_sidebar');
                 const menuToggle = document.getElementById('fc_menuToggle');
                 const isMobile = window.innerWidth <= 768;
                 const isDesktopCollapsed = window.innerWidth > 768 && sidebar.classList.contains('collapsed');
                 
+                // Пропускаем клики внутри панели и по кнопке меню
                 if (sidebar.contains(e.target) || e.target === menuToggle) {
                     return;
                 }
                 
+                // Для мобильных: закрываем если открыто
                 if (isMobile && sidebar.classList.contains('active')) {
                     sidebar.classList.remove('active');
                 }
+                // Для ПК: закрываем если не свернуто
                 else if (!isMobile && !isDesktopCollapsed) {
                     sidebar.classList.add('collapsed');
                 }

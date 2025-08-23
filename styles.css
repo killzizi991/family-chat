@@ -202,19 +202,6 @@ h1 {
     font-size: 1.2em;
 }
 
-#fc_callButton {
-    padding: 5px 10px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#fc_callButton:hover {
-    background-color: #218838;
-}
-
 #fc_logoutButton {
     padding: 5px 10px;
     background-color: #f44336;
@@ -379,92 +366,6 @@ h1 {
     color: white;
 }
 
-/* Стили для звонков */
-#fc_incomingCall {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.call-alert {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.call-alert h3 {
-    margin: 0 0 20px 0;
-}
-
-.call-alert button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#fc_acceptCall {
-    background-color: #28a745;
-    color: white;
-}
-
-#fc_rejectCall {
-    background-color: #f44336;
-    color: white;
-}
-
-#fc_callInterface {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    z-index: 2000;
-    display: none;
-}
-
-.call-container {
-    text-align: center;
-}
-
-.video-container {
-    display: flex;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-#fc_localVideo, #fc_remoteVideo {
-    width: 300px;
-    height: 225px;
-    background: #000;
-    border-radius: 4px;
-}
-
-#fc_localVideo {
-    transform: scaleX(-1);
-}
-
-#fc_endCall {
-    padding: 10px 20px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
 /* Мобильные стили */
 @media (max-width: 768px) {
     #fc_chatContainer {
@@ -511,16 +412,6 @@ h1 {
         bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 999;
-    }
-
-    .video-container {
-        flex-direction: column;
-    }
-
-    #fc_localVideo, #fc_remoteVideo {
-        width: 100%;
-        max-width: 250px;
-        height: 188px;
     }
 }
 
