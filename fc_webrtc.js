@@ -48,7 +48,6 @@ window.familyChat = window.familyChat || {};
             this.callInProgress = true;
             this.showCallInterface('active');
             
-            this.initializePeerConnection();
             this.getUserMedia()
                 .then(() => this.createAnswer())
                 .catch(error => {
@@ -130,17 +129,23 @@ window.familyChat = window.familyChat || {};
             this.showIncomingCallInterface();
             
             this.initializePeerConnection();
-            this.peerConnection.setRemoteDescription(offer)
+            this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+                .then(() => {
+                    console.log('Offer установлен успешно');
+                })
                 .catch(error => console.error('Ошибка установки offer:', error));
         },
 
         handleAnswer: function(answer) {
-            this.peerConnection.setRemoteDescription(answer)
+            this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+                .then(() => {
+                    console.log('Answer установлен успешно');
+                })
                 .catch(error => console.error('Ошибка установки answer:', error));
         },
 
         handleCandidate: function(candidate) {
-            this.peerConnection.addIceCandidate(candidate)
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
                 .catch(error => console.error('Ошибка добавления candidate:', error));
         },
 
