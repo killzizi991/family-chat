@@ -201,16 +201,19 @@ window.familyChat = window.familyChat || {};
         updateUnreadCounts: function(counts) {
             familyChat.unreadCounts = counts;
             
+            // Обновляем счетчики для личных чатов
             const chatItems = document.querySelectorAll('.chat-item[data-username]');
             chatItems.forEach(item => {
                 const username = item.dataset.username;
                 const count = counts[username] || 0;
                 
+                // Удаляем старый счетчик, если есть
                 const oldBadge = item.querySelector('.unread-badge');
                 if (oldBadge) {
                     oldBadge.remove();
                 }
                 
+                // Добавляем новый счетчик, если есть непрочитанные
                 if (count > 0) {
                     const badge = document.createElement('span');
                     badge.className = 'unread-badge';
@@ -236,6 +239,7 @@ window.familyChat = window.familyChat || {};
             const chatsContainer = document.getElementById('fc_chatsContainer');
             chatsContainer.innerHTML = '';
     
+            // Добавляем групповой чат первым элементом
             const groupChat = document.createElement('div');
             groupChat.className = 'chat-item';
             groupChat.innerHTML = '<span>👥</span> Групповой чат';
@@ -246,6 +250,7 @@ window.familyChat = window.familyChat || {};
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
                 familyChat.loadChatHistory();
                 
+                // Закрываем боковую панель на всех устройствах
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.remove('active');
                 if (window.innerWidth > 768) {
@@ -254,6 +259,7 @@ window.familyChat = window.familyChat || {};
             });
             chatsContainer.appendChild(groupChat);
     
+            // Загружаем пользователей
             const users = await familyChat.fetchUsers();
             users.forEach(user => {
                 const userElement = document.createElement('div');
@@ -264,10 +270,12 @@ window.familyChat = window.familyChat || {};
                 `;
                 userElement.dataset.username = user;
                 
+                // Обновляем статус сразу после создания элемента
                 if (familyChat.onlineUsers.includes(user)) {
                     userElement.querySelector('.online-status').classList.add('online');
                 }
                 
+                // Добавляем счетчик непрочитанных, если есть
                 const unreadCount = familyChat.unreadCounts[user] || 0;
                 if (unreadCount > 0) {
                     const badge = document.createElement('span');
@@ -296,6 +304,7 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
                     familyChat.loadChatHistory();
                     
+                    // Закрываем боковую панель на всех устройствах
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.remove('active');
                     if (window.innerWidth > 768) {
@@ -317,6 +326,7 @@ window.familyChat = window.familyChat || {};
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
             
+            // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
                 collapseSidebar.addEventListener('click', () => {
                     const sidebar = document.getElementById('fc_sidebar');
@@ -329,6 +339,7 @@ window.familyChat = window.familyChat || {};
                 await familyChat.ui.handleLogin();
             });
             
+            // Добавляем обработчики для полей ввода в форме логина
             document.getElementById('fc_loginUsername').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -403,19 +414,23 @@ window.familyChat = window.familyChat || {};
                 sidebar.classList.toggle('active');
             });
             
+            // Закрытие меню при клике вне его области
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('fc_sidebar');
                 const menuToggle = document.getElementById('fc_menuToggle');
                 const isMobile = window.innerWidth <= 768;
                 const isDesktopCollapsed = window.innerWidth > 768 && sidebar.classList.contains('collapsed');
                 
+                // Пропускаем клики внутри панели и по кнопке меню
                 if (sidebar.contains(e.target) || e.target === menuToggle) {
                     return;
                 }
                 
+                // Для мобильных: закрываем если открыто
                 if (isMobile && sidebar.classList.contains('active')) {
                     sidebar.classList.remove('active');
                 }
+                // Для ПК: закрываем если не свернуто
                 else if (!isMobile && !isDesktopCollapsed) {
                     sidebar.classList.add('collapsed');
                 }
@@ -456,77 +471,10 @@ window.familyChat = window.familyChat || {};
                 console.error('Ошибка входа:', error);
                 alert('Произошла ошибка при входе. Проверьте консоль для подробностей.');
             }
-        },
-
-        addCallButton: function() {
-            if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
-                const callButton = document.createElement('button');
-                callButton.id = 'fc_startCall';
-                callButton.textContent = '📞';
-                callButton.title = 'Начать звонок';
-                callButton.style.cssText = `
-                    background: none;
-                    border: none;
-                    font-size: 1.5em;
-                    cursor: pointer;
-                    margin-left: 10px;
-                `;
-                
-                const chatHeader = document.getElementById('fc_chatHeader');
-                if (!document.getElementById('fc_startCall')) {
-                    chatHeader.appendChild(callButton);
-                }
-            } else {
-                const callButton = document.getElementById('fc_startCall');
-                if (callButton) callButton.remove();
-            }
-        },
-
-        createCallInterface: function() {
-            if (document.getElementById('fc_callContainer')) return;
-            
-            const callContainer = document.createElement('div');
-            callContainer.id = 'fc_callContainer';
-            callContainer.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.3);
-                z-index: 2000;
-                display: none;
-                width: 300px;
-                text-align: center;
-            `;
-            
-            callContainer.innerHTML = `
-                <div id="fc_callStatus">Статус звонка</div>
-                <div style="margin: 15px 0;">
-                    <video id="fc_localVideo" autoplay muted style="width: 100px; height: 75px; border: 1px solid #ccc;"></video>
-                    <video id="fc_remoteVideo" autoplay style="width: 200px; height: 150px; border: 1px solid #ccc;"></video>
-                </div>
-                <div id="fc_callControls" style="margin: 10px 0;">
-                    <button id="fc_endCall" style="background: #f44336; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Завершить</button>
-                </div>
-                <div id="fc_incomingCall" style="display: none; margin: 10px 0;">
-                    <button id="fc_acceptCall" style="background: #4CAF50; color: white; border: none; padding: 10px; margin-right: 10px; border-radius: 5px; cursor: pointer;">Принять</button>
-                    <button id="fc_rejectCall" style="background: #f44336; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">Отклонить</button>
-                </div>
-            `;
-            
-            document.body.appendChild(callContainer);
         }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
         familyChat.ui.initEventListeners();
-        familyChat.ui.createCallInterface();
-        
-        setInterval(() => {
-            familyChat.ui.addCallButton();
-        }, 1000);
     });
 })();

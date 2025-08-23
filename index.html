@@ -4,7 +4,7 @@
     <title>FamilyChat v0.1</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' ws: wss: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:; media-src 'self' blob:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' ws:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws:;">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -53,6 +53,7 @@
                 <span id="fc_chatTitle">Выберите чат</span>
                 <span>Вы вошли как: <span id="fc_currentUser"></span></span>
                 <button id="fc_logoutButton">Выйти</button>
+                <button id="fc_startCall" style="display:none;">📞</button>
             </div>
             
             <div id="fc_messages">
@@ -63,21 +64,6 @@
                 <input type="text" id="fc_messageInput" placeholder="Введите сообщение">
                 <button id="fc_sendButton">Отправить</button>
             </div>
-        </div>
-    </div>
-    
-    <div id="fc_callContainer" style="display: none;">
-        <div id="fc_callStatus">Статус звонка</div>
-        <div class="video-container">
-            <video id="fc_localVideo" autoplay muted playsinline></video>
-            <video id="fc_remoteVideo" autoplay playsinline></video>
-        </div>
-        <div id="fc_callControls" style="margin: 10px 0;">
-            <button id="fc_endCall">Завершить</button>
-        </div>
-        <div id="fc_incomingCall" style="display: none; margin: 10px 0;">
-            <button id="fc_acceptCall">Принять</button>
-            <button id="fc_rejectCall">Отклонить</button>
         </div>
     </div>
     

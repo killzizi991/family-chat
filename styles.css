@@ -366,88 +366,19 @@ h1 {
     color: white;
 }
 
-/* Стили для звонков */
-#fc_callContainer {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.3);
-    z-index: 2000;
-    display: none;
-    width: 320px;
-    text-align: center;
-}
-
-#fc_callStatus {
-    font-size: 1.2em;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-#fc_localVideo {
-    width: 120px;
-    height: 90px;
-    border: 1px solid #ccc;
-    margin: 5px;
-    background: #000;
-    object-fit: cover;
-}
-
-#fc_remoteVideo {
-    width: 300px;
-    height: 225px;
-    border: 1px solid #ccc;
-    margin: 5px;
-    background: #000;
-    object-fit: cover;
-}
-
-#fc_callControls {
-    margin: 15px 0;
-}
-
-#fc_endCall {
-    background: #f44336;
-    color: white;
+/* Кнопка звонка */
+#fc_startCall {
+    padding: 8px 15px;
     border: none;
-    padding: 10px;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-}
-
-#fc_incomingCall {
-    margin: 15px 0;
-}
-
-#fc_acceptCall {
-    background: #4CAF50;
+    background-color: #28a745;
     color: white;
-    border: none;
-    padding: 10px;
-    margin-right: 10px;
-    border-radius: 5px;
-    cursor: pointer;
+    margin-left: 10px;
 }
 
-#fc_rejectCall {
-    background: #f44336;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.video-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 10px 0;
+#fc_startCall:hover {
+    background-color: #218838;
 }
 
 /* Мобильные стили */
@@ -496,28 +427,6 @@ h1 {
         bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 999;
-    }
-
-    /* Адаптивные стили для звонков */
-    #fc_callContainer {
-        width: 95%;
-        max-width: 320px;
-        padding: 15px;
-    }
-    
-    #fc_localVideo {
-        width: 100px;
-        height: 75px;
-    }
-    
-    #fc_remoteVideo {
-        width: 280px;
-        height: 210px;
-    }
-    
-    .video-container {
-        flex-direction: row;
-        flex-wrap: wrap;
     }
 }
 
