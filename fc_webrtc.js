@@ -162,7 +162,7 @@ window.familyChat = window.familyChat || {};
             }
         },
 
-        setupPeerConnection: function(isAnswerer = false) {
+        async setupPeerConnection(isAnswerer = false) {
             const configuration = {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
@@ -190,12 +190,16 @@ window.familyChat = window.familyChat || {};
                 }
             };
 
-            if (isAnswerer) {
-                this.addLocalStream();
-                this.createAnswer();
-            } else {
-                this.addLocalStream();
-                this.createOffer();
+            try {
+                await this.addLocalStream();
+                if (isAnswerer) {
+                    await this.createAnswer();
+                } else {
+                    await this.createOffer();
+                }
+            } catch (error) {
+                console.error('Ошибка настройки соединения:', error);
+                this.endCall();
             }
         },
 
@@ -210,6 +214,11 @@ window.familyChat = window.familyChat || {};
                     video: true,
                     audio: true
                 });
+
+                if (!this.peerConnection) {
+                    console.error('PeerConnection стал null после получения медиаустройств');
+                    return;
+                }
 
                 this.localStream.getTracks().forEach(track => {
                     this.peerConnection.addTrack(track, this.localStream);
@@ -285,7 +294,6 @@ window.familyChat = window.familyChat || {};
 
             try {
                 await this.peerConnection.setRemoteDescription(offer);
-                this.addLocalStream();
             } catch (error) {
                 console.error('Ошибка обработки offer:', error);
                 this.endCall();
