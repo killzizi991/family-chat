@@ -202,6 +202,19 @@ h1 {
     font-size: 1.2em;
 }
 
+#fc_startCall {
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#fc_startCall:hover {
+    background-color: #218838;
+}
+
 #fc_logoutButton {
     padding: 5px 10px;
     background-color: #f44336;
@@ -213,6 +226,51 @@ h1 {
 
 #fc_logoutButton:hover {
     background-color: #d32f2f;
+}
+
+/* Контейнер звонка */
+#fc_callContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    text-align: center;
+    min-width: 250px;
+}
+
+#fc_callStatus {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+#fc_callControls button, #fc_incomingCall button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+#fc_endCall {
+    background-color: #f44336;
+    color: white;
+}
+
+#fc_acceptCall {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#fc_declineCall {
+    background-color: #f44336;
+    color: white;
 }
 
 /* Область сообщений */
@@ -366,101 +424,6 @@ h1 {
     color: white;
 }
 
-/* Кнопки звонков */
-#fc_callButtons {
-    display: none;
-    text-align: center;
-    padding: 10px;
-    background: #f0f0f0;
-    border-top: 1px solid #ddd;
-}
-
-#fc_voiceCallButton, #fc_videoCallButton, #fc_endCallButton {
-    margin: 0 5px;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#fc_voiceCallButton {
-    background: #28a745;
-    color: white;
-}
-
-#fc_videoCallButton {
-    background: #17a2b8;
-    color: white;
-}
-
-#fc_endCallButton {
-    background: #dc3545;
-    color: white;
-    display: none;
-}
-
-/* Видео контейнер */
-#fc_videoContainer {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    max-width: 600px;
-    background: #000;
-    z-index: 2000;
-    padding: 10px;
-    border-radius: 8px;
-}
-
-#fc_localVideo, #fc_remoteVideo {
-    width: 45%;
-    margin: 5px;
-    border: 2px solid #fff;
-    border-radius: 4px;
-}
-
-#fc_closeVideo {
-    padding: 8px 15px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-/* Входящий звонок */
-#fc_incomingCall {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    z-index: 2000;
-}
-
-#fc_acceptCall, #fc_rejectCall {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#fc_acceptCall {
-    background: #28a745;
-    color: white;
-}
-
-#fc_rejectCall {
-    background: #dc3545;
-    color: white;
-}
-
 /* Мобильные стили */
 @media (max-width: 768px) {
     #fc_chatContainer {
@@ -507,6 +470,11 @@ h1 {
         bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 999;
+    }
+
+    #fc_callContainer {
+        width: 80%;
+        max-width: 300px;
     }
 }
 

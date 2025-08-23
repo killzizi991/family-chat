@@ -52,7 +52,21 @@
                 <button id="fc_menuToggle">☰</button>
                 <span id="fc_chatTitle">Выберите чат</span>
                 <span>Вы вошли как: <span id="fc_currentUser"></span></span>
+                <button id="fc_startCall" style="display:none">📞</button>
                 <button id="fc_logoutButton">Выйти</button>
+            </div>
+            
+            <div id="fc_callContainer" style="display: none;">
+                <div id="fc_callStatus"></div>
+                <div id="fc_incomingCall" style="display: none;">
+                    <button id="fc_acceptCall">Принять</button>
+                    <button id="fc_declineCall">Отклонить</button>
+                </div>
+                <div id="fc_callControls" style="display: none;">
+                    <button id="fc_endCall">Завершить звонок</button>
+                </div>
+                <audio id="fc_localAudio" muted></audio>
+                <audio id="fc_remoteAudio"></audio>
             </div>
             
             <div id="fc_messages">
@@ -62,45 +76,6 @@
             <div id="fc_inputArea">
                 <input type="text" id="fc_messageInput" placeholder="Введите сообщение">
                 <button id="fc_sendButton">Отправить</button>
-            </div>
-
-            <!-- Кнопки звонков (только для личных чатов) -->
-            <div id="fc_callButtons" style="display: none; text-align: center; padding: 10px; background: #f0f0f0; border-top: 1px solid #ddd;">
-                <button id="fc_voiceCallButton" style="margin: 0 5px; padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    📞 Голосовой звонок
-                </button>
-                <button id="fc_videoCallButton" style="margin: 0 5px; padding: 8px 15px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                    📹 Видеозвонок
-                </button>
-                <button id="fc_endCallButton" style="margin: 0 5px; padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">
-                    📞 Завершить звонок
-                </button>
-            </div>
-
-            <!-- Элементы для отображения видео -->
-            <div id="fc_videoContainer" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; max-width: 600px; background: #000; z-index: 2000; padding: 10px; border-radius: 8px;">
-                <div style="display: flex; flex-wrap: wrap; justify-content: center;">
-                    <video id="fc_localVideo" autoplay muted style="width: 45%; margin: 5px; border: 2px solid #fff; border-radius: 4px;"></video>
-                    <video id="fc_remoteVideo" autoplay style="width: 45%; margin: 5px; border: 2px solid #fff; border-radius: 4px;"></video>
-                </div>
-                <div style="text-align: center; margin-top: 10px;">
-                    <button id="fc_closeVideo" style="padding: 8px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Закрыть
-                    </button>
-                </div>
-            </div>
-
-            <!-- Оверлей для входящего звонка -->
-            <div id="fc_incomingCall" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 2000;">
-                <h3>Входящий звонок от <span id="fc_callerName"></span></h3>
-                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
-                    <button id="fc_acceptCall" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Принять
-                    </button>
-                    <button id="fc_rejectCall" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                        Отклонить
-                    </button>
-                </div>
             </div>
         </div>
     </div>
