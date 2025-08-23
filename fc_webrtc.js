@@ -102,6 +102,13 @@ window.familyChat = window.familyChat || {};
                 this.setupRemoteAudio();
             };
 
+            this.peerConnection.oniceconnectionstatechange = () => {
+                console.log('ICE connection state:', this.peerConnection.iceConnectionState);
+                if (this.peerConnection.iceConnectionState === 'connected') {
+                    console.log('ICE connection established');
+                }
+            };
+
             if (this.localStream) {
                 this.localStream.getTracks().forEach(track => {
                     this.peerConnection.addTrack(track, this.localStream);
@@ -119,7 +126,7 @@ window.familyChat = window.familyChat || {};
         },
 
         createOffer: function() {
-            return this.peerConnection.createOffer()
+            return this.peerConnection.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: false })
                 .then(offer => this.peerConnection.setLocalDescription(offer))
                 .then(() => {
                     this.sendWebRTCMessage('webrtc_offer', this.peerConnection.localDescription);
@@ -127,7 +134,7 @@ window.familyChat = window.familyChat || {};
         },
 
         createAnswer: function() {
-            return this.peerConnection.createAnswer()
+            return this.peerConnection.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: false })
                 .then(answer => this.peerConnection.setLocalDescription(answer))
                 .then(() => {
                     this.sendWebRTCMessage('webrtc_answer', this.peerConnection.localDescription);
