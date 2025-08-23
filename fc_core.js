@@ -85,6 +85,50 @@ window.familyChat = {
                             familyChat.ui.markAllMessagesAsRead(message.chatWith);
                             break;
                             
+                        // Обработка WebRTC сообщений
+                        case 'call_incoming':
+                            familyChat.webrtc.handleIncomingCall(message.from);
+                            break;
+                            
+                        case 'call_accepted':
+                            if (familyChat.webrtc.currentCallTarget === message.target) {
+                                familyChat.webrtc.showCallInterface('active');
+                                familyChat.webrtc.isCallActive = true;
+                            }
+                            break;
+                            
+                        case 'call_rejected':
+                            if (familyChat.webrtc.currentCallTarget === message.target) {
+                                familyChat.webrtc.cleanupCall();
+                                alert('Звонок отклонен');
+                            }
+                            break;
+                            
+                        case 'call_ended':
+                            if (familyChat.webrtc.currentCallTarget === message.from) {
+                                familyChat.webrtc.cleanupCall();
+                                alert('Звонок завершен');
+                            }
+                            break;
+                            
+                        case 'webrtc_offer':
+                            if (familyChat.webrtc.currentCallTarget === message.from) {
+                                familyChat.webrtc.handleOffer(message.data);
+                            }
+                            break;
+                            
+                        case 'webrtc_answer':
+                            if (familyChat.webrtc.currentCallTarget === message.from) {
+                                familyChat.webrtc.handleAnswer(message.data);
+                            }
+                            break;
+                            
+                        case 'webrtc_ice_candidate':
+                            if (familyChat.webrtc.currentCallTarget === message.from) {
+                                familyChat.webrtc.handleIceCandidate(message.data);
+                            }
+                            break;
+                            
                         default:
                             const isForCurrentChat = 
                                 (familyChat.currentChat.type === 'group' && message.data.chatType === 'group') ||

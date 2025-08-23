@@ -33,6 +33,7 @@ app.use(express.static(path.join(__dirname)));
 const fc_activeConnections = new Map();
 const fc_onlineUsers = new Set();
 const fc_heartbeatIntervals = new Map();
+const fc_callRequests = new Map();
 
 function fc_authenticate(req, res, next) {
     const sessionId = req.cookies.fc_session;
@@ -294,60 +295,74 @@ wss.on('connection', (ws, req) => {
                     }
                     break;
 
-                // Обработка WebRTC сообщений
-                case 'call_offer':
+                case 'call_request':
                     if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'call_offer',
-                            from: username,
-                            offer: message.offer
+                        fc_callRequests.set(username, {
+                            target: message.target,
+                            timestamp: Date.now()
+                        });
+                        
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.target) {
+                                client.send(JSON.stringify({
+                                    type: 'call_incoming',
+                                    from: username
+                                }));
+                            }
                         });
                     }
                     break;
-
+                    
                 case 'call_answer':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'call_answer',
-                            from: username,
-                            answer: message.answer
+                    if (message.response && message.from) {
+                        if (message.response === 'accept') {
+                            wss.clients.forEach(client => {
+                                if (fc_activeConnections.get(client) === message.from) {
+                                    client.send(JSON.stringify({
+                                        type: 'call_accepted',
+                                        target: username
+                                    }));
+                                }
+                            });
+                        } else {
+                            wss.clients.forEach(client => {
+                                if (fc_activeConnections.get(client) === message.from) {
+                                    client.send(JSON.stringify({
+                                        type: 'call_rejected',
+                                        target: username
+                                    }));
+                                }
+                            });
+                        }
+                        fc_callRequests.delete(message.from);
+                    }
+                    break;
+                    
+                case 'webrtc_offer':
+                case 'webrtc_answer':
+                case 'webrtc_ice_candidate':
+                    if (message.target) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.target) {
+                                client.send(JSON.stringify({
+                                    type: message.type,
+                                    data: message.data,
+                                    from: username
+                                }));
+                            }
                         });
                     }
                     break;
-
-                case 'ice_candidate':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'ice_candidate',
-                            from: username,
-                            candidate: message.candidate
-                        });
-                    }
-                    break;
-
+                    
                 case 'call_end':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'call_end',
-                            from: username
-                        });
-                    }
-                    break;
-
-                case 'call_reject':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'call_reject',
-                            from: username
-                        });
-                    }
-                    break;
-
-                case 'call_busy':
-                    if (message.target && fc_onlineUsers.has(message.target)) {
-                        forwardMessageToUser(message.target, {
-                            type: 'call_busy',
-                            from: username
+                    if (message.target) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.target) {
+                                client.send(JSON.stringify({
+                                    type: 'call_ended',
+                                    from: username
+                                }));
+                            }
                         });
                     }
                     break;
@@ -374,14 +389,6 @@ wss.on('connection', (ws, req) => {
         console.error('WebSocket ошибка:', error);
     });
 });
-
-function forwardMessageToUser(username, message) {
-    wss.clients.forEach(client => {
-        if (fc_activeConnections.get(client) === username && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(message));
-        }
-    });
-}
 
 app.post('/api/register', (req, res) => {
     const { username, code } = req.body;
