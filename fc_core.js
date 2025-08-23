@@ -62,14 +62,6 @@ window.familyChat = {
                 try {
                     const message = JSON.parse(event.data);
                     
-                    // Обработка WebRTC сообщений
-                    if (message.type && message.type.startsWith('webrtc_')) {
-                        if (familyChat.webrtc) {
-                            familyChat.webrtc.handleWebRTCMessage(message);
-                        }
-                        return;
-                    }
-                    
                     switch (message.type) {
                         case 'online_users':
                             familyChat.onlineUsers = message.users;

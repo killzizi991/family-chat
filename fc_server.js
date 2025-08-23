@@ -294,20 +294,60 @@ wss.on('connection', (ws, req) => {
                     }
                     break;
 
-                case 'webrtc_offer':
-                case 'webrtc_answer':
-                case 'webrtc_ice_candidate':
-                case 'webrtc_hangup':
-                    // Пересылаем WebRTC сигналы целевому пользователю
-                    if (message.targetUser && fc_onlineUsers.has(message.targetUser)) {
-                        wss.clients.forEach(client => {
-                            if (fc_activeConnections.get(client) === message.targetUser) {
-                                client.send(JSON.stringify({
-                                    type: message.type,
-                                    data: message.data,
-                                    fromUser: username
-                                }));
-                            }
+                // Обработка WebRTC сообщений
+                case 'call_offer':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'call_offer',
+                            from: username,
+                            offer: message.offer
+                        });
+                    }
+                    break;
+
+                case 'call_answer':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'call_answer',
+                            from: username,
+                            answer: message.answer
+                        });
+                    }
+                    break;
+
+                case 'ice_candidate':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'ice_candidate',
+                            from: username,
+                            candidate: message.candidate
+                        });
+                    }
+                    break;
+
+                case 'call_end':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'call_end',
+                            from: username
+                        });
+                    }
+                    break;
+
+                case 'call_reject':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'call_reject',
+                            from: username
+                        });
+                    }
+                    break;
+
+                case 'call_busy':
+                    if (message.target && fc_onlineUsers.has(message.target)) {
+                        forwardMessageToUser(message.target, {
+                            type: 'call_busy',
+                            from: username
                         });
                     }
                     break;
@@ -334,6 +374,14 @@ wss.on('connection', (ws, req) => {
         console.error('WebSocket ошибка:', error);
     });
 });
+
+function forwardMessageToUser(username, message) {
+    wss.clients.forEach(client => {
+        if (fc_activeConnections.get(client) === username && client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify(message));
+        }
+    });
+}
 
 app.post('/api/register', (req, res) => {
     const { username, code } = req.body;

@@ -52,7 +52,7 @@
                 <button id="fc_menuToggle">☰</button>
                 <span id="fc_chatTitle">Выберите чат</span>
                 <span>Вы вошли как: <span id="fc_currentUser"></span></span>
-                <button id="fc_callButton">📞</button>
+                <button id="fc_callButton" style="display:none">📞</button>
                 <button id="fc_logoutButton">Выйти</button>
             </div>
             
@@ -65,6 +65,31 @@
                 <button id="fc_sendButton">Отправить</button>
             </div>
         </div>
+    </div>
+
+    <!-- Модальное окно входящего звонка -->
+    <div id="incomingCallModal" class="modal" style="display:none">
+        <div class="modal-content">
+            <h3>Входящий звонок</h3>
+            <p>От: <span class="caller-name"></span></p>
+            <div class="call-buttons">
+                <button class="accept-call">Принять</button>
+                <button class="reject-call">Отклонить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Интерфейс активного звонка -->
+    <div id="callInterface" class="call-interface" style="display:none">
+        <div class="call-header">
+            <span class="call-status">Звонок</span>
+            <span id="callTimer">00:00</span>
+        </div>
+        <div class="call-controls">
+            <button class="end-call">Завершить</button>
+            <button class="toggle-mic">Выкл микрофон</button>
+        </div>
+        <audio id="remoteAudio" autoplay></audio>
     </div>
     
     <script src="fc_core.js"></script>

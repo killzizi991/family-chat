@@ -248,6 +248,7 @@ window.familyChat = window.familyChat || {};
             groupChat.addEventListener('click', () => {
                 familyChat.currentChat = { type: 'group', recipient: null };
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
+                document.getElementById('fc_callButton').style.display = 'none';
                 familyChat.loadChatHistory();
                 
                 // Закрываем боковую панель на всех устройствах
@@ -302,6 +303,8 @@ window.familyChat = window.familyChat || {};
                         recipient: user 
                     };
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
+                    document.getElementById('fc_callButton').style.display = 'inline-block';
+                    document.getElementById('fc_callButton').dataset.username = user;
                     familyChat.loadChatHistory();
                     
                     // Закрываем боковую панель на всех устройствах
@@ -325,6 +328,7 @@ window.familyChat = window.familyChat || {};
             const messageInput = document.getElementById('fc_messageInput');
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
+            const callButton = document.getElementById('fc_callButton');
             
             // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
@@ -412,6 +416,14 @@ window.familyChat = window.familyChat || {};
             menuToggle.addEventListener('click', () => {
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.toggle('active');
+            });
+            
+            // Кнопка звонка
+            callButton.addEventListener('click', () => {
+                const username = callButton.dataset.username;
+                if (username && familyChat.webrtc) {
+                    familyChat.webrtc.startCall(username);
+                }
             });
             
             // Закрытие меню при клике вне его области

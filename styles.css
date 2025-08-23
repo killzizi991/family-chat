@@ -204,15 +204,16 @@ h1 {
 
 #fc_callButton {
     padding: 5px 10px;
-    background-color: #28a745;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 1.2em;
 }
 
 #fc_callButton:hover {
-    background-color: #218838;
+    background-color: #0056b3;
 }
 
 #fc_logoutButton {
@@ -379,64 +380,106 @@ h1 {
     color: white;
 }
 
-/* Интерфейс звонков */
-#fc_callInterface, #fc_incomingCall {
+/* Модальные окна */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 300px;
+    width: 100%;
+}
+
+.call-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.accept-call, .reject-call {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.accept-call {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.reject-call {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Интерфейс звонка */
+.call-interface {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
+    background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    z-index: 2000;
     text-align: center;
-}
-
-#fc_callContainer, #fc_incomingCallContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 2001;
     min-width: 250px;
 }
 
-#fc_callStatus {
-    font-size: 1.2em;
-    font-weight: bold;
+.call-header {
+    margin-bottom: 15px;
 }
 
-#fc_callButtons, #fc_incomingCallButtons {
+.call-status {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#callTimer {
+    font-size: 1.2em;
+    color: #007bff;
+}
+
+.call-controls {
     display: flex;
     justify-content: center;
     gap: 10px;
 }
 
-#fc_endCall, #fc_acceptCall, #fc_rejectCall {
-    padding: 10px 20px;
+.end-call, .toggle-mic {
+    padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 0.9em;
+}
+
+.end-call {
+    background-color: #f44336;
     color: white;
 }
 
-#fc_endCall, #fc_rejectCall {
-    background-color: #f44336;
-}
-
-#fc_acceptCall {
-    background-color: #4CAF50;
-}
-
-#fc_endCall:hover, #fc_rejectCall:hover {
-    background-color: #d32f2f;
-}
-
-#fc_acceptCall:hover {
-    background-color: #45a049;
-}
-
-#fc_remoteAudio {
-    display: none;
+.toggle-mic {
+    background-color: #6c757d;
+    color: white;
 }
 
 /* Мобильные стили */
@@ -487,7 +530,12 @@ h1 {
         z-index: 999;
     }
 
-    #fc_callInterface, #fc_incomingCall {
+    .modal-content {
+        margin: 20px;
+        max-width: none;
+    }
+
+    .call-interface {
         width: 90%;
         max-width: 300px;
     }
