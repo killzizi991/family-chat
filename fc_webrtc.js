@@ -60,7 +60,7 @@ window.familyChat = window.familyChat || {};
                 })
                 .then(() => this.createAnswer())
                 .then(() => {
-                    this.sendBufferedIceCandidates();
+                    this.processBufferedIceCandidates();
                 })
                 .catch(error => {
                     console.error('Ошибка принятия звонка:', error);
@@ -145,9 +145,12 @@ window.familyChat = window.familyChat || {};
         },
 
         handleAnswer: function(answer) {
+            if (!this.peerConnection) return;
+            
             this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
                 .then(() => {
                     console.log('Answer установлен успешно');
+                    this.processBufferedIceCandidates();
                 })
                 .catch(error => console.error('Ошибка установки answer:', error));
         },
@@ -158,11 +161,15 @@ window.familyChat = window.familyChat || {};
                 return;
             }
 
-            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                .catch(error => console.error('Ошибка добавления candidate:', error));
+            if (this.peerConnection.remoteDescription) {
+                this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .catch(error => console.error('Ошибка добавления candidate:', error));
+            } else {
+                this.iceCandidatesBuffer.push(candidate);
+            }
         },
 
-        sendBufferedIceCandidates: function() {
+        processBufferedIceCandidates: function() {
             this.iceCandidatesBuffer.forEach(candidate => {
                 this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
                     .catch(error => console.error('Ошибка добавления буферизованного candidate:', error));
