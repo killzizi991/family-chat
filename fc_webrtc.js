@@ -8,6 +8,8 @@ window.familyChat = window.familyChat || {};
         isCallActive: false,
         currentCallTarget: null,
         isInitiator: false,
+        incomingOffer: null,
+        incomingCallFrom: null,
 
         init: function() {
             this.setupEventListeners();
@@ -127,7 +129,9 @@ window.familyChat = window.familyChat || {};
             if (this.peerConnection) {
                 this.peerConnection.addIceCandidate(
                     new RTCIceCandidate(candidate)
-                );
+                ).catch(error => {
+                    console.error('Ошибка добавления ICE кандидата:', error);
+                });
             }
         },
 
@@ -159,7 +163,10 @@ window.familyChat = window.familyChat || {};
             
             this.peerConnection.ontrack = (event) => {
                 this.remoteStream = event.streams[0];
-                this.updateRemoteVideo();
+                const remoteVideo = document.getElementById('fc_remoteVideo');
+                if (remoteVideo) {
+                    remoteVideo.srcObject = this.remoteStream;
+                }
             };
             
             if (this.localStream) {
@@ -175,24 +182,13 @@ window.familyChat = window.familyChat || {};
                     video: true,
                     audio: true
                 });
-                this.updateLocalVideo();
+                const localVideo = document.getElementById('fc_localVideo');
+                if (localVideo) {
+                    localVideo.srcObject = this.localStream;
+                }
             } catch (error) {
                 console.error('Ошибка доступа к медиаустройствам:', error);
                 throw error;
-            }
-        },
-
-        updateLocalVideo: function() {
-            const localVideo = document.getElementById('fc_localVideo');
-            if (localVideo && this.localStream) {
-                localVideo.srcObject = this.localStream;
-            }
-        },
-
-        updateRemoteVideo: function() {
-            const remoteVideo = document.getElementById('fc_remoteVideo');
-            if (remoteVideo && this.remoteStream) {
-                remoteVideo.srcObject = this.remoteStream;
             }
         },
 
