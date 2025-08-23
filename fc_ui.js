@@ -201,16 +201,19 @@ window.familyChat = window.familyChat || {};
         updateUnreadCounts: function(counts) {
             familyChat.unreadCounts = counts;
             
+            // Обновляем счетчики для личных чатов
             const chatItems = document.querySelectorAll('.chat-item[data-username]');
             chatItems.forEach(item => {
                 const username = item.dataset.username;
                 const count = counts[username] || 0;
                 
+                // Удаляем старый счетчик, если есть
                 const oldBadge = item.querySelector('.unread-badge');
                 if (oldBadge) {
                     oldBadge.remove();
                 }
                 
+                // Добавляем новый счетчик, если есть непрочитанные
                 if (count > 0) {
                     const badge = document.createElement('span');
                     badge.className = 'unread-badge';
@@ -236,6 +239,7 @@ window.familyChat = window.familyChat || {};
             const chatsContainer = document.getElementById('fc_chatsContainer');
             chatsContainer.innerHTML = '';
     
+            // Добавляем групповой чат первым элементом
             const groupChat = document.createElement('div');
             groupChat.className = 'chat-item';
             groupChat.innerHTML = '<span>👥</span> Групповой чат';
@@ -246,6 +250,7 @@ window.familyChat = window.familyChat || {};
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
                 familyChat.loadChatHistory();
                 
+                // Закрываем боковую панель на всех устройствах
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.remove('active');
                 if (window.innerWidth > 768) {
@@ -254,6 +259,7 @@ window.familyChat = window.familyChat || {};
             });
             chatsContainer.appendChild(groupChat);
     
+            // Загружаем пользователей
             const users = await familyChat.fetchUsers();
             users.forEach(user => {
                 const userElement = document.createElement('div');
@@ -264,10 +270,12 @@ window.familyChat = window.familyChat || {};
                 `;
                 userElement.dataset.username = user;
                 
+                // Обновляем статус сразу после создания элемента
                 if (familyChat.onlineUsers.includes(user)) {
                     userElement.querySelector('.online-status').classList.add('online');
                 }
                 
+                // Добавляем счетчик непрочитанных, если есть
                 const unreadCount = familyChat.unreadCounts[user] || 0;
                 if (unreadCount > 0) {
                     const badge = document.createElement('span');
@@ -296,6 +304,7 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
                     familyChat.loadChatHistory();
                     
+                    // Закрываем боковую панель на всех устройствах
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.remove('active');
                     if (window.innerWidth > 768) {
@@ -317,6 +326,7 @@ window.familyChat = window.familyChat || {};
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
             
+            // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
                 collapseSidebar.addEventListener('click', () => {
                     const sidebar = document.getElementById('fc_sidebar');
@@ -329,6 +339,7 @@ window.familyChat = window.familyChat || {};
                 await familyChat.ui.handleLogin();
             });
             
+            // Добавляем обработчики для полей ввода в форме логина
             document.getElementById('fc_loginUsername').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -403,21 +414,46 @@ window.familyChat = window.familyChat || {};
                 sidebar.classList.toggle('active');
             });
             
+            // Закрытие меню при клике вне его области
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('fc_sidebar');
                 const menuToggle = document.getElementById('fc_menuToggle');
                 const isMobile = window.innerWidth <= 768;
                 const isDesktopCollapsed = window.innerWidth > 768 && sidebar.classList.contains('collapsed');
                 
+                // Пропускаем клики внутри панели и по кнопке меню
                 if (sidebar.contains(e.target) || e.target === menuToggle) {
                     return;
                 }
                 
+                // Для мобильных: закрываем если открыто
                 if (isMobile && sidebar.classList.contains('active')) {
                     sidebar.classList.remove('active');
                 }
+                // Для ПК: закрываем если не свернуто
                 else if (!isMobile && !isDesktopCollapsed) {
                     sidebar.classList.add('collapsed');
+                }
+            });
+
+            // Обработчики для кнопок звонков
+            document.addEventListener('click', (e) => {
+                if (e.target.id === 'fc_callButton') {
+                    if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
+                        familyChat.webrtc.startCall(familyChat.currentChat.recipient);
+                    }
+                }
+                
+                if (e.target.id === 'fc_acceptCall') {
+                    familyChat.webrtc.acceptCall();
+                }
+                
+                if (e.target.id === 'fc_rejectCall') {
+                    familyChat.webrtc.rejectCall();
+                }
+                
+                if (e.target.id === 'fc_endCall') {
+                    familyChat.webrtc.endCall();
                 }
             });
         },
@@ -458,54 +494,140 @@ window.familyChat = window.familyChat || {};
             }
         },
 
-        addCallButton: function() {
-            const chatHeader = document.getElementById('fc_chatHeader');
-            if (!chatHeader) return;
+        // WebRTC UI функции
+        showCallButton: function() {
+            if (familyChat.currentChat.type !== 'private' || !familyChat.currentChat.recipient) {
+                return;
+            }
             
-            const existingCallButton = document.getElementById('fc_startCall');
-            if (existingCallButton) return;
-            
-            if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
-                const callButton = document.createElement('button');
-                callButton.id = 'fc_startCall';
+            let callButton = document.getElementById('fc_callButton');
+            if (!callButton) {
+                callButton = document.createElement('button');
+                callButton.id = 'fc_callButton';
                 callButton.innerHTML = '📞';
-                callButton.title = 'Начать звонок';
                 callButton.style.cssText = `
-                    background: none;
+                    position: fixed;
+                    bottom: 80px;
+                    right: 20px;
+                    width: 60px;
+                    height: 60px;
+                    border-radius: 50%;
+                    background-color: #28a745;
+                    color: white;
                     border: none;
-                    font-size: 1.5em;
+                    font-size: 24px;
                     cursor: pointer;
-                    margin-right: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+                    z-index: 1000;
                 `;
-                
-                chatHeader.insertBefore(callButton, chatHeader.querySelector('#fc_logoutButton'));
+                document.body.appendChild(callButton);
+            }
+            callButton.style.display = 'block';
+        },
+
+        hideCallButton: function() {
+            const callButton = document.getElementById('fc_callButton');
+            if (callButton) {
+                callButton.style.display = 'none';
             }
         },
 
-        handleWebRTCSignaling: function(message) {
-            switch(message.type) {
-                case 'webrtc_offer':
-                    familyChat.webrtc.handleOffer(message.offer, message.from);
-                    break;
-                case 'webrtc_answer':
-                    familyChat.webrtc.handleAnswer(message.answer);
-                    break;
-                case 'webrtc_ice_candidate':
-                    familyChat.webrtc.handleIceCandidate(message.candidate);
-                    break;
-                case 'webrtc_reject':
-                    alert('Call rejected');
-                    familyChat.webrtc.endCall();
-                    break;
+        showIncomingCall: function(fromUser) {
+            this.hideCallInterface();
+            
+            const overlay = document.createElement('div');
+            overlay.id = 'fc_incomingCallOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.7);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                    <h3>Входящий звонок</h3>
+                    <p>${fromUser} вызывает вас</p>
+                    <div>
+                        <button id="fc_acceptCall" style="background: #28a745; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
+                            Принять
+                        </button>
+                        <button id="fc_rejectCall" style="background: #dc3545; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
+                            Отклонить
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+        },
+
+        showCallInterface: function(targetUser, isInitiator) {
+            this.hideCallInterface();
+            this.hideCallButton();
+            
+            const overlay = document.createElement('div');
+            overlay.id = 'fc_callOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.7);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 2000;
+            `;
+            
+            overlay.innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
+                    <h3>${isInitiator ? 'Звонок' : 'Разговор'} с ${targetUser}</h3>
+                    <p id="fc_callStatus">${isInitiator ? 'Звонок...' : 'Разговор активен'}</p>
+                    <audio id="fc_remoteAudio" autoplay></audio>
+                    <div>
+                        <button id="fc_endCall" style="background: #dc3545; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
+                            Завершить
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+        },
+
+        updateCallStatus: function(status) {
+            const statusElement = document.getElementById('fc_callStatus');
+            if (statusElement) {
+                statusElement.textContent = status === 'connected' ? 'Разговор активен' : 'Соединение...';
             }
+        },
+
+        hideCallInterface: function() {
+            const incomingOverlay = document.getElementById('fc_incomingCallOverlay');
+            if (incomingOverlay) {
+                incomingOverlay.remove();
+            }
+            
+            const callOverlay = document.getElementById('fc_callOverlay');
+            if (callOverlay) {
+                callOverlay.remove();
+            }
+            
+            this.showCallButton();
         }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
         familyChat.ui.initEventListeners();
-        
-        setInterval(() => {
-            familyChat.ui.addCallButton();
-        }, 1000);
     });
 })();

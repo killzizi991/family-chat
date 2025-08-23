@@ -366,50 +366,6 @@ h1 {
     color: white;
 }
 
-/* Стили для звонков */
-.call-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.call-dialog {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    min-width: 300px;
-}
-
-.call-dialog h3 {
-    margin-top: 0;
-}
-
-.call-dialog button {
-    margin: 5px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.call-dialog button:first-of-type {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.call-dialog button:last-of-type {
-    background-color: #f44336;
-    color: white;
-}
-
 /* Мобильные стили */
 @media (max-width: 768px) {
     #fc_chatContainer {
@@ -471,6 +427,135 @@ h1 {
     }
     
     #fc_sidebar.collapsed + #fc_mainChat {
+        width: 100%;
+    }
+}
+
+/* Стили для кнопки звонка */
+#fc_callButton {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+    display: none;
+}
+
+#fc_callButton:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+
+/* Оверлей для звонков */
+#fc_incomingCallOverlay,
+#fc_callOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.call-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    min-width: 300px;
+}
+
+.call-container h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.call-container p {
+    margin: 10px 0 20px;
+    color: #666;
+}
+
+.call-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.call-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    min-width: 100px;
+}
+
+.call-button-accept {
+    background-color: #28a745;
+    color: white;
+}
+
+.call-button-reject {
+    background-color: #dc3545;
+    color: white;
+}
+
+.call-button-end {
+    background-color: #dc3545;
+    color: white;
+}
+
+.call-button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+}
+
+/* Анимация для входящего звонка */
+@keyframes ring {
+    0% { transform: rotate(0); }
+    25% { transform: rotate(5deg); }
+    50% { transform: rotate(-5deg); }
+    75% { transform: rotate(5deg); }
+    100% { transform: rotate(0); }
+}
+
+.call-ringing {
+    animation: ring 0.5s ease-in-out infinite;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    #fc_callButton {
+        bottom: 70px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .call-container {
+        width: 90%;
+        max-width: 300px;
+    }
+    
+    .call-buttons {
+        flex-direction: column;
+    }
+    
+    .call-button {
         width: 100%;
     }
 }

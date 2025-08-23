@@ -294,21 +294,21 @@ wss.on('connection', (ws, req) => {
                     }
                     break;
 
+                // WebRTC обработчики
                 case 'webrtc_offer':
                 case 'webrtc_answer':
                 case 'webrtc_ice_candidate':
+                case 'webrtc_hangup':
                 case 'webrtc_reject':
+                case 'webrtc_busy':
                     if (message.target) {
-                        wss.clients.forEach(client => {
-                            const clientUser = fc_activeConnections.get(client);
-                            if (clientUser === message.target) {
-                                client.send(JSON.stringify({
-                                    type: message.type,
-                                    [message.type.split('_')[1]]: message[message.type.split('_')[1]],
-                                    from: username
-                                }));
-                            }
-                        });
+                        const targetClient = Array.from(fc_activeConnections.entries())
+                            .find(([client, user]) => user === message.target);
+                        
+                        if (targetClient && targetClient[0].readyState === WebSocket.OPEN) {
+                            message.from = username;
+                            targetClient[0].send(JSON.stringify(message));
+                        }
                     }
                     break;
             }
@@ -332,6 +332,147 @@ wss.on('connection', (ws, req) => {
     
     ws.on('error', (error) => {
         console.error('WebSocket ошибка:', error);
+    });
+});
+
+app.post('/api/register', (req, res) => {
+    const { username, code } = req.body;
+    const result = fc_registerUser(username, code);
+    res.json(result);
+});
+
+app.post('/api/login', (req, res) => {
+    const { username, code } = req.body;
+    const result = fc_loginUser(username, code);
+    
+    if (result.success) {
+        res.cookie('fc_session', result.sessionId, {
+            httpOnly: true,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'Lax',
+            secure: false
+        });
+    }
+    
+    res.json(result);
+});
+
+app.post('/api/logout', (req, res) => {
+    const sessionId = req.cookies.fc_session;
+    
+    if (sessionId) {
+        fc_logoutUser(sessionId);
+        res.clearCookie('fc_session');
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ success: false, message: "Сессия не найдена" });
+    }
+});
+
+app.get('/api/check-session', (req, res) => {
+    const sessionId = req.cookies.fc_session;
+    const username = sessionId && fc_validateSession(sessionId);
+    
+    if (username) {
+        res.json({ loggedIn: true, username });
+    } else {
+        res.json({ loggedIn: false });
+    }
+});
+
+app.get('/api/users', fc_authenticate, async (req, res) => {
+    try {
+        const users = await new Promise((resolve, reject) => {
+            db.all("SELECT username FROM fc_users WHERE username != ?", 
+                   [req.username], 
+                   (err, rows) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows.map(row => row.username));
+                }
+            });
+        });
+        res.json(users);
+    } catch (error) {
+        console.error('Ошибка получения пользователей:', error);
+        res.status(500).json({ error: "Ошибка сервера" });
+    }
+});
+
+app.get('/api/messages', fc_authenticate, (req, res) => {
+    const chatType = req.query.chatType || 'group';
+    const withUser = req.query.withUser || null;
+    const username = req.username;
+    
+    const options = {
+        chatType: chatType,
+        recipient: withUser,
+        currentUser: username
+    };
+    
+    fc_getRecentMessages(options, 100, (err, messages) => {
+        if (err) {
+            console.error('Ошибка получения сообщений:', err);
+            return res.status(500).json({ error: "Ошибка сервера" });
+        }
+        
+        if (chatType === 'private' && withUser) {
+            const filteredMessages = messages.filter(msg => 
+                (msg.username === username && msg.recipient === withUser) ||
+                (msg.username === withUser && msg.recipient === username)
+            );
+            
+            res.json(filteredMessages);
+        } else {
+            res.json(messages);
+        }
+    });
+});
+
+app.get('/api/unread-counts', fc_authenticate, (req, res) => {
+    const username = req.username;
+    
+    fc_getUnreadMessagesPerUser(username, (err, counts) => {
+        if (err) {
+            console.error('Ошибка получения непрочитанных сообщений:', err);
+            return res.status(500).json({ error: "Ошибка сервера" });
+        }
+        
+        res.json(counts);
+    });
+});
+
+app.post('/api/mark-read', fc_authenticate, (req, res) => {
+    const { sender } = req.body;
+    const username = req.username;
+    
+    if (!sender) {
+        return res.status(400).json({ error: "Не указан отправитель" });
+    }
+    
+    fc_markMessagesAsRead(username, sender, (err, count) => {
+        if (err) {
+            console.error('Ошибка отметки прочтения:', err);
+            return res.status(500).json({ error: "Ошибка сервера" });
+        }
+        
+        wss.clients.forEach(client => {
+            const clientUser = fc_activeConnections.get(client);
+            if (clientUser === sender) {
+                client.send(JSON.stringify({
+                    type: 'messages_read',
+                    reader: username,
+                    sender: sender,
+                    chatWith: username
+                }));
+            }
+        });
+        
+        sendUnreadCounts(sender);
+        sendUnreadCounts(username);
+        
+        res.json({ success: true, markedCount: count });
     });
 });
 
