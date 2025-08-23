@@ -378,7 +378,7 @@ h1 {
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
     z-index: 2000;
     display: none;
-    width: 300px;
+    width: 320px;
     text-align: center;
 }
 
@@ -389,17 +389,21 @@ h1 {
 }
 
 #fc_localVideo {
-    width: 100px;
-    height: 75px;
+    width: 120px;
+    height: 90px;
     border: 1px solid #ccc;
     margin: 5px;
+    background: #000;
+    object-fit: cover;
 }
 
 #fc_remoteVideo {
-    width: 200px;
-    height: 150px;
+    width: 300px;
+    height: 225px;
     border: 1px solid #ccc;
     margin: 5px;
+    background: #000;
+    object-fit: cover;
 }
 
 #fc_callControls {
@@ -436,6 +440,14 @@ h1 {
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.video-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
 }
 
 /* Мобильные стили */
@@ -488,18 +500,24 @@ h1 {
 
     /* Адаптивные стили для звонков */
     #fc_callContainer {
-        width: 90%;
-        max-width: 300px;
+        width: 95%;
+        max-width: 320px;
+        padding: 15px;
     }
     
     #fc_localVideo {
-        width: 80px;
-        height: 60px;
+        width: 100px;
+        height: 75px;
     }
     
     #fc_remoteVideo {
-        width: 160px;
-        height: 120px;
+        width: 280px;
+        height: 210px;
+    }
+    
+    .video-container {
+        flex-direction: row;
+        flex-wrap: wrap;
     }
 }
 
