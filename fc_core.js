@@ -42,7 +42,8 @@ window.familyChat = {
         };
         
         familyChat.initWebSocket = function() {
-            familyChat.ws = new WebSocket('ws://' + window.location.host);
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            familyChat.ws = new WebSocket(protocol + '//' + window.location.host);
             
             familyChat.ws.onopen = () => {
                 console.log("WebSocket подключен!");
