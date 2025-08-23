@@ -10,6 +10,14 @@ window.familyChat = window.familyChat || {};
         callTimeout: null,
 
         init: function() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) {
+                console.error("WebRTC не поддерживается в этом браузере");
+                const callButton = document.getElementById('fc_callButton');
+                if (callButton) {
+                    callButton.style.display = 'none';
+                }
+                return;
+            }
             this.setupEventListeners();
             console.log("WebRTC модуль инициализирован");
         },
@@ -208,7 +216,17 @@ window.familyChat = window.familyChat || {};
                 }
             } catch (error) {
                 console.error('Ошибка доступа к медиаустройствам:', error);
-                alert('Не удалось получить доступ к камере/микрофону');
+                let errorMessage;
+                if (error.name === 'NotAllowedError') {
+                    errorMessage = 'Доступ к камере/микрофону запрещен. Разрешите доступ в настройках браузера и попробуйте снова.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage = 'Не найдено подходящее устройство. Убедитесь, что камера и микрофон подключены.';
+                } else if (error.name === 'OverConstrainedError') {
+                    errorMessage = 'Невозможно удовлетворить ограничениям доступа. Попробуйте выбрать другие устройства.';
+                } else {
+                    errorMessage = `Неизвестная ошибка: ${error.message}`;
+                }
+                alert(errorMessage);
                 this.endCall();
             }
         },
