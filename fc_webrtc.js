@@ -1,28 +1,103 @@
-window.familyChatWebRTC = {
+window.familyChat.webrtc = {
     peerConnection: null,
     localStream: null,
-    remoteStream: null,
-    isCaller: false,
+    isCalling: false,
+    isInCall: false,
     callTarget: null,
-    currentCall: null,
+    currentOffer: null,
 
     init: function() {
         this.setupEventListeners();
-        this.createPeerConnection();
     },
 
     setupEventListeners: function() {
         document.addEventListener('click', (e) => {
-            if (e.target.id === 'fc_startCall') {
+            if (e.target.id === 'fc_callButton') {
                 this.startCall();
-            } else if (e.target.id === 'fc_endCall') {
-                this.endCall();
             } else if (e.target.id === 'fc_acceptCall') {
                 this.acceptCall();
-            } else if (e.target.id === 'fc_declineCall') {
-                this.declineCall();
+            } else if (e.target.id === 'fc_rejectCall' || e.target.id === 'fc_endCall') {
+                this.endCall();
             }
         });
+    },
+
+    startCall: function() {
+        if (!familyChat.currentChat.recipient || familyChat.currentChat.type !== 'private') {
+            alert('Выберите пользователя для звонка');
+            return;
+        }
+
+        if (this.isInCall) {
+            alert('Уже идет звонок');
+            return;
+        }
+
+        this.callTarget = familyChat.currentChat.recipient;
+        this.isCalling = true;
+        this.showCallInterface('calling');
+
+        this.initiateCall();
+    },
+
+    initiateCall: async function() {
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({ 
+                video: false, 
+                audio: true 
+            });
+
+            this.createPeerConnection();
+            
+            this.localStream.getTracks().forEach(track => {
+                this.peerConnection.addTrack(track, this.localStream);
+            });
+
+            const offer = await this.peerConnection.createOffer();
+            await this.peerConnection.setLocalDescription(offer);
+
+            familyChat.ws.send(JSON.stringify({
+                type: 'webrtc_offer',
+                targetUser: this.callTarget,
+                data: offer
+            }));
+
+        } catch (error) {
+            console.error('Ошибка инициализации звонка:', error);
+            this.endCall();
+        }
+    },
+
+    acceptCall: async function() {
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({ 
+                video: false, 
+                audio: true 
+            });
+
+            this.createPeerConnection();
+            
+            this.localStream.getTracks().forEach(track => {
+                this.peerConnection.addTrack(track, this.localStream);
+            });
+
+            await this.peerConnection.setRemoteDescription(this.currentOffer);
+            const answer = await this.peerConnection.createAnswer();
+            await this.peerConnection.setLocalDescription(answer);
+
+            familyChat.ws.send(JSON.stringify({
+                type: 'webrtc_answer',
+                targetUser: this.callTarget,
+                data: answer
+            }));
+
+            this.isInCall = true;
+            this.showCallInterface('active');
+
+        } catch (error) {
+            console.error('Ошибка принятия звонка:', error);
+            this.endCall();
+        }
     },
 
     createPeerConnection: function() {
@@ -39,192 +114,95 @@ window.familyChatWebRTC = {
             if (event.candidate) {
                 familyChat.ws.send(JSON.stringify({
                     type: 'webrtc_ice_candidate',
-                    target: this.callTarget,
-                    candidate: event.candidate
+                    targetUser: this.callTarget,
+                    data: event.candidate
                 }));
             }
         };
 
         this.peerConnection.ontrack = (event) => {
-            const remoteAudio = document.getElementById('fc_remoteAudio');
-            if (remoteAudio) {
-                remoteAudio.srcObject = event.streams[0];
-                this.remoteStream = event.streams[0];
+            const audio = document.getElementById('fc_remoteAudio');
+            if (audio) {
+                audio.srcObject = event.streams[0];
+                audio.play().catch(e => console.error('Ошибка воспроизведения:', e));
             }
         };
 
         this.peerConnection.onconnectionstatechange = () => {
-            console.log('Connection state:', this.peerConnection.connectionState);
             if (this.peerConnection.connectionState === 'connected') {
-                this.showCallInterface();
+                console.log('PeerConnection установлен');
+            } else if (this.peerConnection.connectionState === 'disconnected' ||
+                       this.peerConnection.connectionState === 'failed') {
+                this.endCall();
             }
         };
     },
 
-    async startCall() {
-        if (!familyChat.currentChat.type === 'private' || !familyChat.currentChat.recipient) {
-            alert('Выберите пользователя для звонка');
+    handleOffer: async function(offer, fromUser) {
+        if (this.isInCall || this.isCalling) {
+            familyChat.ws.send(JSON.stringify({
+                type: 'webrtc_hangup',
+                targetUser: fromUser,
+                data: { reason: 'busy' }
+            }));
             return;
         }
 
-        try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: true,
-                video: false
-            });
-            
-            this.isCaller = true;
-            this.callTarget = familyChat.currentChat.recipient;
-            this.currentCall = {
-                caller: familyChat.currentUser,
-                target: this.callTarget,
-                type: 'audio'
-            };
-
-            this.localStream.getTracks().forEach(track => {
-                this.peerConnection.addTrack(track, this.localStream);
-            });
-
-            const offer = await this.peerConnection.createOffer();
-            await this.peerConnection.setLocalDescription(offer);
-
-            familyChat.ws.send(JSON.stringify({
-                type: 'webrtc_offer',
-                target: this.callTarget,
-                offer: offer
-            }));
-
-            this.showCallInterface();
-
-        } catch (error) {
-            console.error('Error starting call:', error);
-            alert('Ошибка при запуске звонка');
-        }
+        this.callTarget = fromUser;
+        this.currentOffer = offer;
+        this.showIncomingCallInterface();
     },
 
-    async handleOffer(offer, fromUser) {
-        this.isCaller = false;
-        this.callTarget = fromUser;
-        this.currentCall = {
-            caller: fromUser,
-            target: familyChat.currentUser,
-            type: 'audio'
-        };
-
-        this.showIncomingCallUI();
-
+    handleAnswer: async function(answer) {
+        if (!this.peerConnection) return;
+        
         try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ 
-                audio: true,
-                video: false
-            });
-
-            this.localStream.getTracks().forEach(track => {
-                this.peerConnection.addTrack(track, this.localStream);
-            });
-
-            await this.peerConnection.setRemoteDescription(offer);
-            const answer = await this.peerConnection.createAnswer();
-            await this.peerConnection.setLocalDescription(answer);
-
-            familyChat.ws.send(JSON.stringify({
-                type: 'webrtc_answer',
-                target: fromUser,
-                answer: answer
-            }));
-
+            await this.peerConnection.setRemoteDescription(answer);
+            this.isInCall = true;
+            this.showCallInterface('active');
         } catch (error) {
-            console.error('Error handling offer:', error);
+            console.error('Ошибка обработки ответа:', error);
             this.endCall();
         }
     },
 
-    async handleAnswer(answer) {
-        await this.peerConnection.setRemoteDescription(answer);
-    },
-
-    async handleIceCandidate(candidate) {
+    handleIceCandidate: async function(candidate) {
+        if (!this.peerConnection) return;
+        
         try {
             await this.peerConnection.addIceCandidate(candidate);
         } catch (error) {
-            console.error('Error adding ICE candidate:', error);
+            console.error('Ошибка добавления ICE кандидата:', error);
         }
     },
 
-    showIncomingCallUI() {
-        const callUI = `
-            <div id="fc_incomingCallModal" style="
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 0 20px rgba(0,0,0,0.2);
-                z-index: 10000;
-            ">
-                <h3>Входящий звонок от ${this.callTarget}</h3>
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button id="fc_acceptCall" style="
-                        padding: 10px 20px;
-                        background: #4CAF50;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    ">Принять</button>
-                    <button id="fc_declineCall" style="
-                        padding: 10px 20px;
-                        background: #f44336;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    ">Отклонить</button>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', callUI);
+    handleHangup: function() {
+        this.endCall();
+        alert('Собеседник завершил звонок');
     },
 
-    showCallInterface() {
-        const callInterface = `
-            <div id="fc_callInterface" style="
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: white;
-                padding: 15px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                z-index: 9999;
-            ">
-                <div style="margin-bottom: 10px;">
-                    <strong>Звонок ${this.isCaller ? 'с' : 'с'} ${this.callTarget}</strong>
-                </div>
-                <audio id="fc_remoteAudio" autoplay></audio>
-                <button id="fc_endCall" style="
-                    padding: 8px 16px;
-                    background: #f44336;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                ">Завершить</button>
-            </div>
-        `;
-        
-        const existingUI = document.getElementById('fc_callInterface');
-        if (existingUI) existingUI.remove();
-        
-        document.body.insertAdjacentHTML('beforeend', callInterface);
-        
-        const incomingModal = document.getElementById('fc_incomingCallModal');
-        if (incomingModal) incomingModal.remove();
+    handleWebRTCMessage: function(message) {
+        try {
+            switch (message.type) {
+                case 'webrtc_offer':
+                    this.handleOffer(message.data, message.fromUser);
+                    break;
+                case 'webrtc_answer':
+                    this.handleAnswer(message.data);
+                    break;
+                case 'webrtc_ice_candidate':
+                    this.handleIceCandidate(message.data);
+                    break;
+                case 'webrtc_hangup':
+                    this.handleHangup();
+                    break;
+            }
+        } catch (e) {
+            console.error('Ошибка обработки WebRTC сообщения:', e);
+        }
     },
 
-    endCall() {
+    endCall: function() {
         if (this.peerConnection) {
             this.peerConnection.close();
             this.peerConnection = null;
@@ -235,35 +213,84 @@ window.familyChatWebRTC = {
             this.localStream = null;
         }
 
-        this.remoteStream = null;
-        this.isCaller = false;
-        this.callTarget = null;
-        this.currentCall = null;
+        this.isCalling = false;
+        this.isInCall = false;
 
-        const callInterface = document.getElementById('fc_callInterface');
-        if (callInterface) callInterface.remove();
-
-        const incomingModal = document.getElementById('fc_incomingCallModal');
-        if (incomingModal) incomingModal.remove();
-
-        if (familyChat.ws) {
+        if (this.callTarget) {
             familyChat.ws.send(JSON.stringify({
-                type: 'webrtc_end_call',
-                target: this.callTarget
+                type: 'webrtc_hangup',
+                targetUser: this.callTarget,
+                data: { reason: 'ended' }
             }));
         }
+
+        this.hideCallInterface();
+        this.callTarget = null;
+        this.currentOffer = null;
     },
 
-    acceptCall() {
-        this.showCallInterface();
+    showCallInterface: function(state) {
+        let callInterface = document.getElementById('fc_callInterface');
+        if (!callInterface) {
+            callInterface = document.createElement('div');
+            callInterface.id = 'fc_callInterface';
+            callInterface.innerHTML = `
+                <div id="fc_callContainer">
+                    <div id="fc_callStatus"></div>
+                    <audio id="fc_remoteAudio" autoplay></audio>
+                    <div id="fc_callButtons">
+                        <button id="fc_endCall">Завершить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(callInterface);
+        }
+
+        const status = document.getElementById('fc_callStatus');
+        const buttons = document.getElementById('fc_callButtons');
+
+        if (state === 'calling') {
+            status.textContent = `Звонок ${this.callTarget}...`;
+            buttons.innerHTML = '<button id="fc_endCall">Отмена</button>';
+        } else if (state === 'active') {
+            status.textContent = `Разговор с ${this.callTarget}`;
+            buttons.innerHTML = '<button id="fc_endCall">Завершить</button>';
+        }
+
+        callInterface.style.display = 'block';
     },
 
-    declineCall() {
-        this.endCall();
+    showIncomingCallInterface: function() {
+        const callInterface = document.createElement('div');
+        callInterface.id = 'fc_incomingCall';
+        callInterface.innerHTML = `
+            <div id="fc_incomingCallContainer">
+                <div>Входящий звонок от ${this.callTarget}</div>
+                <div id="fc_incomingCallButtons">
+                    <button id="fc_acceptCall">Принять</button>
+                    <button id="fc_rejectCall">Отклонить</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(callInterface);
+
+        setTimeout(() => {
+            if (document.getElementById('fc_incomingCall')) {
+                this.endCall();
+            }
+        }, 30000);
+    },
+
+    hideCallInterface: function() {
+        const callInterface = document.getElementById('fc_callInterface');
+        const incomingCall = document.getElementById('fc_incomingCall');
+        
+        if (callInterface) callInterface.style.display = 'none';
+        if (incomingCall) incomingCall.remove();
     }
 };
 
 // Инициализация WebRTC при загрузке
 document.addEventListener('DOMContentLoaded', () => {
-    familyChatWebRTC.init();
+    familyChat.webrtc.init();
 });

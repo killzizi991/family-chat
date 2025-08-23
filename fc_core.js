@@ -62,6 +62,14 @@ window.familyChat = {
                 try {
                     const message = JSON.parse(event.data);
                     
+                    // Обработка WebRTC сообщений
+                    if (message.type && message.type.startsWith('webrtc_')) {
+                        if (familyChat.webrtc) {
+                            familyChat.webrtc.handleWebRTCMessage(message);
+                        }
+                        return;
+                    }
+                    
                     switch (message.type) {
                         case 'online_users':
                             familyChat.onlineUsers = message.users;
@@ -83,22 +91,6 @@ window.familyChat = {
                             
                         case 'messages_read':
                             familyChat.ui.markAllMessagesAsRead(message.chatWith);
-                            break;
-                            
-                        case 'webrtc_offer':
-                            familyChatWebRTC.handleOffer(message.offer, message.from);
-                            break;
-                            
-                        case 'webrtc_answer':
-                            familyChatWebRTC.handleAnswer(message.answer);
-                            break;
-                            
-                        case 'webrtc_ice_candidate':
-                            familyChatWebRTC.handleIceCandidate(message.candidate);
-                            break;
-                            
-                        case 'webrtc_end_call':
-                            familyChatWebRTC.endCall();
                             break;
                             
                         default:

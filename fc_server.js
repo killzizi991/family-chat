@@ -294,56 +294,22 @@ wss.on('connection', (ws, req) => {
                     }
                     break;
 
-                // WebRTC сообщения
                 case 'webrtc_offer':
-                    wss.clients.forEach(client => {
-                        const clientUser = fc_activeConnections.get(client);
-                        if (clientUser === message.target) {
-                            client.send(JSON.stringify({
-                                type: 'webrtc_offer',
-                                offer: message.offer,
-                                from: username
-                            }));
-                        }
-                    });
-                    break;
-
                 case 'webrtc_answer':
-                    wss.clients.forEach(client => {
-                        const clientUser = fc_activeConnections.get(client);
-                        if (clientUser === message.target) {
-                            client.send(JSON.stringify({
-                                type: 'webrtc_answer',
-                                answer: message.answer,
-                                from: username
-                            }));
-                        }
-                    });
-                    break;
-
                 case 'webrtc_ice_candidate':
-                    wss.clients.forEach(client => {
-                        const clientUser = fc_activeConnections.get(client);
-                        if (clientUser === message.target) {
-                            client.send(JSON.stringify({
-                                type: 'webrtc_ice_candidate',
-                                candidate: message.candidate,
-                                from: username
-                            }));
-                        }
-                    });
-                    break;
-
-                case 'webrtc_end_call':
-                    wss.clients.forEach(client => {
-                        const clientUser = fc_activeConnections.get(client);
-                        if (clientUser === message.target) {
-                            client.send(JSON.stringify({
-                                type: 'webrtc_end_call',
-                                from: username
-                            }));
-                        }
-                    });
+                case 'webrtc_hangup':
+                    // Пересылаем WebRTC сигналы целевому пользователю
+                    if (message.targetUser && fc_onlineUsers.has(message.targetUser)) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.targetUser) {
+                                client.send(JSON.stringify({
+                                    type: message.type,
+                                    data: message.data,
+                                    fromUser: username
+                                }));
+                            }
+                        });
+                    }
                     break;
             }
         } catch (e) {

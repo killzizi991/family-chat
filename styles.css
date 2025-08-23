@@ -202,6 +202,19 @@ h1 {
     font-size: 1.2em;
 }
 
+#fc_callButton {
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#fc_callButton:hover {
+    background-color: #218838;
+}
+
 #fc_logoutButton {
     padding: 5px 10px;
     background-color: #f44336;
@@ -366,19 +379,64 @@ h1 {
     color: white;
 }
 
-/* Кнопка звонка */
-#fc_startCall {
-    padding: 8px 15px;
+/* Интерфейс звонков */
+#fc_callInterface, #fc_incomingCall {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 2000;
+    text-align: center;
+}
+
+#fc_callContainer, #fc_incomingCallContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 250px;
+}
+
+#fc_callStatus {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#fc_callButtons, #fc_incomingCallButtons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#fc_endCall, #fc_acceptCall, #fc_rejectCall {
+    padding: 10px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    background-color: #28a745;
     color: white;
-    margin-left: 10px;
 }
 
-#fc_startCall:hover {
-    background-color: #218838;
+#fc_endCall, #fc_rejectCall {
+    background-color: #f44336;
+}
+
+#fc_acceptCall {
+    background-color: #4CAF50;
+}
+
+#fc_endCall:hover, #fc_rejectCall:hover {
+    background-color: #d32f2f;
+}
+
+#fc_acceptCall:hover {
+    background-color: #45a049;
+}
+
+#fc_remoteAudio {
+    display: none;
 }
 
 /* Мобильные стили */
@@ -427,6 +485,11 @@ h1 {
         bottom: 0;
         background: rgba(0,0,0,0.5);
         z-index: 999;
+    }
+
+    #fc_callInterface, #fc_incomingCall {
+        width: 90%;
+        max-width: 300px;
     }
 }
 
