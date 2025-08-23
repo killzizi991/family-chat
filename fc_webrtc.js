@@ -201,6 +201,11 @@ window.familyChat = window.familyChat || {};
 
         async addLocalStream() {
             try {
+                if (!this.peerConnection) {
+                    console.error('PeerConnection не инициализирован');
+                    return;
+                }
+
                 this.localStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
@@ -233,6 +238,11 @@ window.familyChat = window.familyChat || {};
 
         async createOffer() {
             try {
+                if (!this.peerConnection) {
+                    console.error('PeerConnection не инициализирован');
+                    return;
+                }
+
                 const offer = await this.peerConnection.createOffer();
                 await this.peerConnection.setLocalDescription(offer);
 
@@ -249,6 +259,11 @@ window.familyChat = window.familyChat || {};
 
         async createAnswer() {
             try {
+                if (!this.peerConnection) {
+                    console.error('PeerConnection не инициализирован');
+                    return;
+                }
+
                 const answer = await this.peerConnection.createAnswer();
                 await this.peerConnection.setLocalDescription(answer);
 
@@ -279,6 +294,11 @@ window.familyChat = window.familyChat || {};
 
         async handleAnswer(answer) {
             try {
+                if (!this.peerConnection) {
+                    console.error('PeerConnection не инициализирован');
+                    return;
+                }
+
                 await this.peerConnection.setRemoteDescription(answer);
             } catch (error) {
                 console.error('Ошибка обработки answer:', error);
@@ -288,6 +308,11 @@ window.familyChat = window.familyChat || {};
 
         async handleIceCandidate(candidate) {
             try {
+                if (!this.peerConnection) {
+                    console.error('PeerConnection не инициализирован');
+                    return;
+                }
+
                 await this.peerConnection.addIceCandidate(candidate);
             } catch (error) {
                 console.error('Ошибка добавления ICE candidate:', error);
