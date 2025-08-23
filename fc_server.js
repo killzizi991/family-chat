@@ -33,6 +33,7 @@ app.use(express.static(path.join(__dirname)));
 const fc_activeConnections = new Map();
 const fc_onlineUsers = new Set();
 const fc_heartbeatIntervals = new Map();
+const fc_activeCalls = new Map();
 
 function fc_authenticate(req, res, next) {
     const sessionId = req.cookies.fc_session;
@@ -289,6 +290,65 @@ wss.on('connection', (ws, req) => {
                                 
                                 sendUnreadCounts(message.sender);
                                 sendUnreadCounts(username);
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_offer':
+                    if (message.targetUser && fc_onlineUsers.has(message.targetUser)) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.targetUser) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_offer',
+                                    offer: message.offer,
+                                    from: username,
+                                    targetUser: message.targetUser
+                                }));
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_answer':
+                    if (message.targetUser && fc_onlineUsers.has(message.targetUser)) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.targetUser) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_answer',
+                                    answer: message.answer,
+                                    from: username,
+                                    targetUser: message.targetUser
+                                }));
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_ice_candidate':
+                    if (message.targetUser && fc_onlineUsers.has(message.targetUser)) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.targetUser) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_ice_candidate',
+                                    candidate: message.candidate,
+                                    from: username,
+                                    targetUser: message.targetUser
+                                }));
+                            }
+                        });
+                    }
+                    break;
+
+                case 'webrtc_call_end':
+                    if (message.targetUser) {
+                        wss.clients.forEach(client => {
+                            if (fc_activeConnections.get(client) === message.targetUser) {
+                                client.send(JSON.stringify({
+                                    type: 'webrtc_call_end',
+                                    from: username,
+                                    targetUser: message.targetUser
+                                }));
                             }
                         });
                     }

@@ -50,12 +50,11 @@ window.familyChat = {
                 familyChat.reconnectAttempts = 0;
                 document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Соединение с чатом установлено</div>';
                 
-                // Устанавливаем обработчик для heartbeat
                 familyChat.heartbeatInterval = setInterval(() => {
                     if (familyChat.ws && familyChat.ws.readyState === WebSocket.OPEN) {
                         familyChat.ws.send(JSON.stringify({ type: 'heartbeat' }));
                     }
-                }, 25000); // Отправляем heartbeat каждые 25 секунд
+                }, 25000);
             };
             
             familyChat.ws.onmessage = async (event) => {
@@ -74,7 +73,6 @@ window.familyChat = {
                             break;
                             
                         case 'heartbeat':
-                            // Ответ на heartbeat, ничего не делаем
                             break;
                             
                         case 'delete':
@@ -83,6 +81,30 @@ window.familyChat = {
                             
                         case 'messages_read':
                             familyChat.ui.markAllMessagesAsRead(message.chatWith);
+                            break;
+
+                        case 'webrtc_offer':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleOffer(message.offer, message.from);
+                            }
+                            break;
+
+                        case 'webrtc_answer':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleAnswer(message.answer);
+                            }
+                            break;
+
+                        case 'webrtc_ice_candidate':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleIceCandidate(message.candidate);
+                            }
+                            break;
+
+                        case 'webrtc_call_end':
+                            if (familyChat.webrtc) {
+                                familyChat.webrtc.handleCallEnd();
+                            }
                             break;
                             
                         default:
@@ -108,7 +130,6 @@ window.familyChat = {
                                 switch (message.type) {
                                     case 'chat':
                                         familyChat.ui.handleChatMessage(message.data);
-                                        // Если это личное сообщение и чат активен, отмечаем как прочитанное
                                         if (message.data.chatType === 'private' && 
                                             familyChat.currentChat.type === 'private' &&
                                             familyChat.currentChat.recipient === message.data.username) {
@@ -146,14 +167,12 @@ window.familyChat = {
             familyChat.ws.onclose = () => {
                 console.log('Соединение закрыто');
                 
-                // Очищаем интервал heartbeat
                 if (familyChat.heartbeatInterval) {
                     clearInterval(familyChat.heartbeatInterval);
                 }
                 
                 familyChat.ws = null;
                 
-                // Пытаемся переподключиться с экспоненциальной задержкой
                 if (familyChat.reconnectAttempts < familyChat.maxReconnectAttempts) {
                     const delay = Math.pow(2, familyChat.reconnectAttempts) * 1000;
                     familyChat.reconnectAttempts++;
@@ -175,7 +194,7 @@ window.familyChat = {
                 if (!response.ok) throw new Error('Ошибка сервера');
                 return await response.json();
             } catch (error) {
-                console.error('Ошибка загрузки пользователей:', error);
+                console.error('Ошибка загрузка пользователей:', error);
                 return [];
             }
         };
@@ -197,7 +216,6 @@ window.familyChat = {
             if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
                 if (familyChat.privateChatsCache[familyChat.currentChat.recipient]) {
                     familyChat.ui.displayCachedMessages();
-                    // Отмечаем сообщения как прочитанные при открытии чата
                     familyChat.markMessagesAsRead(familyChat.currentChat.recipient);
                     return;
                 }
@@ -225,7 +243,6 @@ window.familyChat = {
                     
                     if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
                         familyChat.privateChatsCache[familyChat.currentChat.recipient] = messages;
-                        // Отмечаем сообщения как прочитанные при открытии чата
                         familyChat.markMessagesAsRead(familyChat.currentChat.recipient);
                     }
                 }
@@ -265,17 +282,14 @@ window.familyChat = {
             }
         };
         
-        // Обработчики для определения видимости страницы
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') {
-                // Страница снова активна, проверяем соединение
                 if (!familyChat.ws || familyChat.ws.readyState !== WebSocket.OPEN) {
                     familyChat.initWebSocket();
                 }
             }
         });
         
-        // Обработчик для определения онлайн/оффлайн статуса
         window.addEventListener('online', () => {
             document.getElementById('fc_messages').innerHTML += 
                 '<div class="system-msg">Соединение восстановлено</div>';
