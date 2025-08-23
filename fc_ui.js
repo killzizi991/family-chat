@@ -185,7 +185,6 @@ window.familyChat = window.familyChat || {};
         },
         
         updateOnlineStatus: function(onlineUsers) {
-            familyChat.onlineUsers = onlineUsers;
             const chatItems = document.querySelectorAll('.chat-item[data-username]');
             chatItems.forEach(item => {
                 const username = item.dataset.username;
@@ -197,7 +196,6 @@ window.familyChat = window.familyChat || {};
                     statusIndicator.classList.remove('online');
                 }
             });
-            this.updateCallButton();
         },
         
         updateUnreadCounts: function(counts) {
@@ -247,7 +245,6 @@ window.familyChat = window.familyChat || {};
                 familyChat.currentChat = { type: 'group', recipient: null };
                 document.getElementById('fc_chatTitle').textContent = "Общий чат";
                 familyChat.loadChatHistory();
-                familyChat.ui.updateCallButton();
                 
                 const sidebar = document.getElementById('fc_sidebar');
                 sidebar.classList.remove('active');
@@ -298,7 +295,6 @@ window.familyChat = window.familyChat || {};
                     };
                     document.getElementById('fc_chatTitle').textContent = `Чат с ${user}`;
                     familyChat.loadChatHistory();
-                    familyChat.ui.updateCallButton();
                     
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.remove('active');
@@ -453,7 +449,6 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
                     await familyChat.ui.initChatList();
                     familyChat.loadChatHistory();
-                    familyChat.ui.updateCallButton();
                 } else {
                     alert(`Ошибка: ${result.message}`);
                 }
@@ -463,24 +458,54 @@ window.familyChat = window.familyChat || {};
             }
         },
 
-        updateCallButton: function() {
-            const callButton = document.getElementById('fc_startCall');
-            if (!callButton) return;
+        addCallButton: function() {
+            const chatHeader = document.getElementById('fc_chatHeader');
+            if (!chatHeader) return;
             
-            const isPrivateChat = familyChat.currentChat.type === 'private';
-            const recipient = familyChat.currentChat.recipient;
-            const recipientOnline = familyChat.onlineUsers.includes(recipient);
-            const callInProgress = familyChat.webrtc && familyChat.webrtc.callInProgress;
+            const existingCallButton = document.getElementById('fc_startCall');
+            if (existingCallButton) return;
             
-            if (isPrivateChat && recipient && recipientOnline && !callInProgress) {
-                callButton.style.display = 'inline-block';
-            } else {
-                callButton.style.display = 'none';
+            if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
+                const callButton = document.createElement('button');
+                callButton.id = 'fc_startCall';
+                callButton.innerHTML = '📞';
+                callButton.title = 'Начать звонок';
+                callButton.style.cssText = `
+                    background: none;
+                    border: none;
+                    font-size: 1.5em;
+                    cursor: pointer;
+                    margin-right: 10px;
+                `;
+                
+                chatHeader.insertBefore(callButton, chatHeader.querySelector('#fc_logoutButton'));
+            }
+        },
+
+        handleWebRTCSignaling: function(message) {
+            switch(message.type) {
+                case 'webrtc_offer':
+                    familyChat.webrtc.handleOffer(message.offer, message.from);
+                    break;
+                case 'webrtc_answer':
+                    familyChat.webrtc.handleAnswer(message.answer);
+                    break;
+                case 'webrtc_ice_candidate':
+                    familyChat.webrtc.handleIceCandidate(message.candidate);
+                    break;
+                case 'webrtc_reject':
+                    alert('Call rejected');
+                    familyChat.webrtc.endCall();
+                    break;
             }
         }
     };
 
     document.addEventListener('DOMContentLoaded', () => {
         familyChat.ui.initEventListeners();
+        
+        setInterval(() => {
+            familyChat.ui.addCallButton();
+        }, 1000);
     });
 })();
