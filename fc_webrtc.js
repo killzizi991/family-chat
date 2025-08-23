@@ -8,6 +8,9 @@ window.familyChat = window.familyChat || {};
         isCaller: false,
         callInProgress: false,
         currentCallRecipient: null,
+        iceCandidatesBuffer: [],
+        pendingOffer: null,
+        pendingOfferSender: null,
 
         init: function() {
             this.setupEventListeners();
@@ -49,7 +52,16 @@ window.familyChat = window.familyChat || {};
             this.showCallInterface('active');
             
             this.getUserMedia()
+                .then(() => {
+                    this.initializePeerConnection();
+                    return this.peerConnection.setRemoteDescription(
+                        new RTCSessionDescription(this.pendingOffer)
+                    );
+                })
                 .then(() => this.createAnswer())
+                .then(() => {
+                    this.sendBufferedIceCandidates();
+                })
                 .catch(error => {
                     console.error('Ошибка принятия звонка:', error);
                     this.endCall();
@@ -77,6 +89,7 @@ window.familyChat = window.familyChat || {};
             };
 
             this.peerConnection = new RTCPeerConnection(configuration);
+            this.iceCandidatesBuffer = [];
 
             this.peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
@@ -126,14 +139,9 @@ window.familyChat = window.familyChat || {};
 
             this.isCaller = false;
             this.currentCallRecipient = sender;
+            this.pendingOffer = offer;
+            this.pendingOfferSender = sender;
             this.showIncomingCallInterface();
-            
-            this.initializePeerConnection();
-            this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
-                .then(() => {
-                    console.log('Offer установлен успешно');
-                })
-                .catch(error => console.error('Ошибка установки offer:', error));
         },
 
         handleAnswer: function(answer) {
@@ -145,8 +153,21 @@ window.familyChat = window.familyChat || {};
         },
 
         handleCandidate: function(candidate) {
+            if (!this.peerConnection) {
+                this.iceCandidatesBuffer.push(candidate);
+                return;
+            }
+
             this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
                 .catch(error => console.error('Ошибка добавления candidate:', error));
+        },
+
+        sendBufferedIceCandidates: function() {
+            this.iceCandidatesBuffer.forEach(candidate => {
+                this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .catch(error => console.error('Ошибка добавления буферизованного candidate:', error));
+            });
+            this.iceCandidatesBuffer = [];
         },
 
         handleEndCall: function() {
@@ -274,6 +295,9 @@ window.familyChat = window.familyChat || {};
             this.remoteStream = null;
             this.callInProgress = false;
             this.currentCallRecipient = null;
+            this.pendingOffer = null;
+            this.pendingOfferSender = null;
+            this.iceCandidatesBuffer = [];
             
             const localAudio = document.getElementById('fc_localAudio');
             const remoteAudio = document.getElementById('fc_remoteAudio');
