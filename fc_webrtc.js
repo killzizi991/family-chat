@@ -6,6 +6,7 @@ window.familyChat = window.familyChat || {};
     let currentCall = null;
     let isInitiator = false;
     let iceCandidateQueue = [];
+    let pendingOffer = null;
 
     familyChat.webrtc = {
         init: function() {
@@ -140,6 +141,7 @@ window.familyChat = window.familyChat || {};
             }
 
             currentCall = data.from;
+            this.pendingOffer = data.offer;
             familyChat.ui.showIncomingCall(data.from);
 
             setTimeout(() => {
@@ -150,7 +152,7 @@ window.familyChat = window.familyChat || {};
         },
 
         acceptCall: function() {
-            if (!currentCall) return;
+            if (!currentCall || !this.pendingOffer) return;
 
             navigator.mediaDevices.getUserMedia({ audio: true, video: false })
                 .then(stream => {
@@ -160,7 +162,7 @@ window.familyChat = window.familyChat || {};
                         peerConnection.addTrack(track, localStream);
                     });
 
-                    peerConnection.setRemoteDescription(data.offer)
+                    peerConnection.setRemoteDescription(this.pendingOffer)
                         .then(() => peerConnection.createAnswer())
                         .then(answer => peerConnection.setLocalDescription(answer))
                         .then(() => {
@@ -243,6 +245,7 @@ window.familyChat = window.familyChat || {};
             currentCall = null;
             isInitiator = false;
             iceCandidateQueue = [];
+            pendingOffer = null;
             familyChat.ui.hideCallInterface();
         },
 
