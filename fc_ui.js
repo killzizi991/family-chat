@@ -344,6 +344,8 @@ window.familyChat = window.familyChat || {};
             const messageInput = document.getElementById('fc_messageInput');
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
+            const settingsButton = document.getElementById('fc_settingsButton');
+            const settingsMenu = document.getElementById('fc_settingsMenu');
             
             // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
@@ -352,6 +354,11 @@ window.familyChat = window.familyChat || {};
                     sidebar.classList.toggle('collapsed');
                 });
             }
+            
+            // Обработчик для кнопки настроек
+            settingsButton.addEventListener('click', () => {
+                settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
+            });
             
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -437,12 +444,19 @@ window.familyChat = window.familyChat || {};
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('fc_sidebar');
                 const menuToggle = document.getElementById('fc_menuToggle');
+                const settingsButton = document.getElementById('fc_settingsButton');
+                const settingsMenu = document.getElementById('fc_settingsMenu');
                 const isMobile = window.innerWidth <= 768;
                 const isDesktopCollapsed = window.innerWidth > 768 && sidebar.classList.contains('collapsed');
                 
                 // Пропускаем клики внутри панели и по кнопке меню
-                if (sidebar.contains(e.target) || e.target === menuToggle) {
+                if (sidebar.contains(e.target) || e.target === menuToggle || e.target === settingsButton) {
                     return;
+                }
+                
+                // Закрываем меню настроек при клике вне его
+                if (settingsMenu.style.display === 'block' && !settingsMenu.contains(e.target)) {
+                    settingsMenu.style.display = 'none';
                 }
                 
                 // Для мобильных: закрываем если открыто
