@@ -2,6 +2,25 @@ window.familyChat = window.familyChat || {};
 
 (function() {
     familyChat.ui = {
+        showNotification: function(message, type = 'info') {
+            const notifications = document.getElementById('fc_notifications');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            notification.addEventListener('click', () => {
+                notification.remove();
+            });
+            
+            notifications.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        },
+
         handleChatMessage: function(msg) {
             const messagesDiv = document.getElementById('fc_messages');
             const isCurrentUser = msg.username === familyChat.currentUser;
@@ -367,11 +386,11 @@ window.familyChat = window.familyChat || {};
                 
                 const result = await response.json();
                 if (result.success) {
-                    alert('Регистрация успешна! Теперь войдите.');
+                    familyChat.ui.showNotification('Регистрация успешна! Теперь войдите.', 'success');
                     registerForm.style.display = 'none';
                     loginForm.style.display = 'block';
                 } else {
-                    alert(`Ошибка: ${result.message}`);
+                    familyChat.ui.showNotification(`Ошибка: ${result.message}`, 'error');
                 }
             });
             
@@ -398,9 +417,9 @@ window.familyChat = window.familyChat || {};
                     document.getElementById('fc_messages').innerHTML = '';
                     familyChat.currentUser = null;
                     familyChat.privateChatsCache = {};
-                    alert('Вы вышли из системы');
+                    familyChat.ui.showNotification('Вы вышли из системы', 'info');
                 } else {
-                    alert('Ошибка выхода');
+                    familyChat.ui.showNotification('Ошибка выхода', 'error');
                 }
             });
             
@@ -435,27 +454,6 @@ window.familyChat = window.familyChat || {};
                     sidebar.classList.add('collapsed');
                 }
             });
-
-            // Обработчики для кнопок звонков
-            document.addEventListener('click', (e) => {
-                if (e.target.id === 'fc_callButton') {
-                    if (familyChat.currentChat.type === 'private' && familyChat.currentChat.recipient) {
-                        familyChat.webrtc.startCall(familyChat.currentChat.recipient);
-                    }
-                }
-                
-                if (e.target.id === 'fc_acceptCall') {
-                    familyChat.webrtc.acceptCall();
-                }
-                
-                if (e.target.id === 'fc_rejectCall') {
-                    familyChat.webrtc.rejectCall();
-                }
-                
-                if (e.target.id === 'fc_endCall') {
-                    familyChat.webrtc.endCall();
-                }
-            });
         },
         
         handleLogin: async function() {
@@ -463,7 +461,7 @@ window.familyChat = window.familyChat || {};
             const code = document.getElementById('fc_loginCode').value;
             
             if (!username || !code) {
-                alert('Заполните все поля');
+                familyChat.ui.showNotification('Заполните все поля', 'error');
                 return;
             }
             
@@ -486,144 +484,12 @@ window.familyChat = window.familyChat || {};
                     await familyChat.ui.initChatList();
                     familyChat.loadChatHistory();
                 } else {
-                    alert(`Ошибка: ${result.message}`);
+                    familyChat.ui.showNotification(`Ошибка: ${result.message}`, 'error');
                 }
             } catch (error) {
                 console.error('Ошибка входа:', error);
-                alert('Произошла ошибка при входе. Проверьте консоль для подробностей.');
+                familyChat.ui.showNotification('Произошла ошибка при входе. Проверьте консоль для подробностей.', 'error');
             }
-        },
-
-        // WebRTC UI функции
-        showCallButton: function() {
-            if (familyChat.currentChat.type !== 'private' || !familyChat.currentChat.recipient) {
-                return;
-            }
-            
-            let callButton = document.getElementById('fc_callButton');
-            if (!callButton) {
-                callButton = document.createElement('button');
-                callButton.id = 'fc_callButton';
-                callButton.innerHTML = '📞';
-                callButton.style.cssText = `
-                    position: fixed;
-                    bottom: 80px;
-                    right: 20px;
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    background-color: #28a745;
-                    color: white;
-                    border: none;
-                    font-size: 24px;
-                    cursor: pointer;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-                    z-index: 1000;
-                `;
-                document.body.appendChild(callButton);
-            }
-            callButton.style.display = 'block';
-        },
-
-        hideCallButton: function() {
-            const callButton = document.getElementById('fc_callButton');
-            if (callButton) {
-                callButton.style.display = 'none';
-            }
-        },
-
-        showIncomingCall: function(fromUser) {
-            this.hideCallInterface();
-            
-            const overlay = document.createElement('div');
-            overlay.id = 'fc_incomingCallOverlay';
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0,0,0,0.7);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 2000;
-            `;
-            
-            overlay.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h3>Входящий звонок</h3>
-                    <p>${fromUser} вызывает вас</p>
-                    <div>
-                        <button id="fc_acceptCall" style="background: #28a745; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
-                            Принять
-                        </button>
-                        <button id="fc_rejectCall" style="background: #dc3545; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
-                            Отклонить
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-        },
-
-        showCallInterface: function(targetUser, isInitiator) {
-            this.hideCallInterface();
-            this.hideCallButton();
-            
-            const overlay = document.createElement('div');
-            overlay.id = 'fc_callOverlay';
-            overlay.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background-color: rgba(0,0,0,0.7);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                z-index: 2000;
-            `;
-            
-            overlay.innerHTML = `
-                <div style="background: white; padding: 20px; border-radius: 10px; text-align: center;">
-                    <h3>${isInitiator ? 'Звонок' : 'Разговор'} с ${targetUser}</h3>
-                    <p id="fc_callStatus">${isInitiator ? 'Звонок...' : 'Разговор активен'}</p>
-                    <audio id="fc_remoteAudio" autoplay></audio>
-                    <div>
-                        <button id="fc_endCall" style="background: #dc3545; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer;">
-                            Завершить
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(overlay);
-        },
-
-        updateCallStatus: function(status) {
-            const statusElement = document.getElementById('fc_callStatus');
-            if (statusElement) {
-                statusElement.textContent = status === 'connected' ? 'Разговор активен' : 'Соединение...';
-            }
-        },
-
-        hideCallInterface: function() {
-            const incomingOverlay = document.getElementById('fc_incomingCallOverlay');
-            if (incomingOverlay) {
-                incomingOverlay.remove();
-            }
-            
-            const callOverlay = document.getElementById('fc_callOverlay');
-            if (callOverlay) {
-                callOverlay.remove();
-            }
-            
-            this.showCallButton();
         }
     };
 

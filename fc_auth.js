@@ -133,20 +133,7 @@ function fc_validateSession(sessionId) {
     return fc_activeSessions[sessionId] || null;
 }
 
-function fc_cleanupSessions() {
-    console.log("Cleaning up old sessions...");
-    const now = Date.now();
-    for (const sessionId in fc_activeSessions) {
-        const sessionTime = parseInt(sessionId.split('_')[1]);
-        if (now - sessionTime > 30 * 24 * 60 * 60 * 1000) {
-            delete fc_activeSessions[sessionId];
-        }
-    }
-    saveAuthData();
-}
-
 loadAuthData();
-fc_cleanupSessions();
 
 module.exports = {
     fc_registerUser,

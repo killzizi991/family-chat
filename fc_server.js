@@ -160,28 +160,6 @@ wss.on('connection', (ws, req) => {
             const recipient = message.recipient || null;
             
             switch (message.type) {
-                case 'webrtc_offer':
-                case 'webrtc_answer':
-                case 'webrtc_ice_candidate':
-                case 'webrtc_hangup':
-                case 'webrtc_reject':
-                case 'webrtc_busy':
-                    if (message.target) {
-                        const targetClient = Array.from(fc_activeConnections.entries())
-                            .find(([client, user]) => user === message.target);
-                        
-                        if (targetClient && targetClient[0].readyState === WebSocket.OPEN) {
-                            message.from = username;
-                            targetClient[0].send(JSON.stringify(message));
-                        } else {
-                            ws.send(JSON.stringify({
-                                type: 'webrtc_error',
-                                error: 'User not available'
-                            }));
-                        }
-                    }
-                    break;
-                    
                 case 'chat':
                     fc_addMessage({
                         username,
@@ -459,24 +437,22 @@ app.post('/api/mark-read', fc_authenticate, (req, res) => {
         if (err) {
             console.error('Ошибка отметки прочтения:', err);
             return res.status(500).json({ error: "Ошибка сервера" });
-    }
-    
-        if (count > 0) {
-            wss.clients.forEach(client => {
-                const clientUser = fc_activeConnections.get(client);
-                if (clientUser === sender) {
-                    client.send(JSON.stringify({
-                        type: 'messages_read',
-                        reader: username,
-                        sender: sender,
-                        chatWith: username
-                    }));
-                }
-            });
-            
-            sendUnreadCounts(sender);
-            sendUnreadCounts(username);
         }
+        
+        wss.clients.forEach(client => {
+            const clientUser = fc_activeConnections.get(client);
+            if (clientUser === sender) {
+                client.send(JSON.stringify({
+                    type: 'messages_read',
+                    reader: username,
+                    sender: sender,
+                    chatWith: username
+                }));
+            }
+        });
+        
+        sendUnreadCounts(sender);
+        sendUnreadCounts(username);
         
         res.json({ success: true, markedCount: count });
     });
