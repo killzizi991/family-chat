@@ -7,7 +7,8 @@ const {
     fc_registerUser, 
     fc_loginUser,
     fc_logoutUser,
-    fc_validateSession 
+    fc_validateSession,
+    fc_changeUsername
 } = require('./fc_auth');
 const { 
     fc_addMessage, 
@@ -349,6 +350,22 @@ app.post('/api/logout', (req, res) => {
     } else {
         res.status(400).json({ success: false, message: "Сессия не найдена" });
     }
+});
+
+app.post('/api/change-username', fc_authenticate, (req, res) => {
+    const { newUsername, code } = req.body;
+    const oldUsername = req.username;
+    
+    const result = fc_changeUsername(oldUsername, newUsername, code);
+    if (result.success) {
+        // Разлогиниваем пользователя после смены имени
+        const sessionId = req.cookies.fc_session;
+        if (sessionId) {
+            fc_logoutUser(sessionId);
+            res.clearCookie('fc_session');
+        }
+    }
+    res.json(result);
 });
 
 app.get('/api/check-session', (req, res) => {

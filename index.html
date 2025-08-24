@@ -49,7 +49,18 @@
             </div>
             <div id="fc_settingsButton" class="settings-button">⚙️</div>
             <div id="fc_settingsMenu" class="settings-menu" style="display: none;">
+                <button id="fc_changeUsernameBtn">Сменить имя</button>
                 <button id="fc_logoutButton">Выйти</button>
+                <div id="fc_changeUsernameForm" style="display: none; margin-top: 10px;">
+                    <label for="fc_newUsername">Новое имя:</label>
+                    <input type="text" id="fc_newUsername" required>
+                    <label for="fc_changeUsernameCode">Код доступа:</label>
+                    <input type="text" id="fc_changeUsernameCode" required>
+                    <div style="display: flex; gap: 5px; margin-top: 10px;">
+                        <button type="submit" style="flex: 1;">Сохранить</button>
+                        <button type="button" id="fc_changeUsernameCancel" style="flex: 1;">Отмена</button>
+                    </div>
+                </div>
             </div>
         </div>
         

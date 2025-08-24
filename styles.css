@@ -177,7 +177,8 @@ h1 {
 .settings-menu button {
     width: 100%;
     padding: 10px;
-    background-color: #f44336;
+    margin-bottom: 5px;
+    background-color: #007bff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -185,7 +186,58 @@ h1 {
 }
 
 .settings-menu button:hover {
-    background-color: #d32f2f;
+    background-color: #0056b3;
+}
+
+/* Форма смены имени пользователя */
+#fc_changeUsernameForm {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
+#fc_changeUsernameForm label {
+    display: block;
+    margin: 5px 0 3px;
+    font-weight: bold;
+}
+
+#fc_changeUsernameForm input {
+    width: 100%;
+    padding: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+#fc_changeUsernameForm button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#fc_changeUsernameForm button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+}
+
+#fc_changeUsernameForm button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+#fc_changeUsernameCancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+#fc_changeUsernameCancel:hover {
+    background-color: #c82333;
 }
 
 /* Стили для элементов чата */
