@@ -5,6 +5,7 @@ window.familyChat = window.familyChat || {};
     let peerConnection = null;
     let currentCall = null;
     let isInitiator = false;
+    let iceCandidateQueue = [];
 
     familyChat.webrtc = {
         init: function() {
@@ -63,14 +64,19 @@ window.familyChat = window.familyChat || {};
             };
 
             peerConnection = new RTCPeerConnection(configuration);
+            iceCandidateQueue = [];
 
             peerConnection.onicecandidate = event => {
                 if (event.candidate) {
-                    familyChat.ws.send(JSON.stringify({
-                        type: 'webrtc_ice_candidate',
-                        target: currentCall,
-                        candidate: event.candidate
-                    }));
+                    if (peerConnection.remoteDescription) {
+                        familyChat.ws.send(JSON.stringify({
+                            type: 'webrtc_ice_candidate',
+                            target: currentCall,
+                            candidate: event.candidate
+                        }));
+                    } else {
+                        iceCandidateQueue.push(event.candidate);
+                    }
                 }
             };
 
@@ -90,6 +96,40 @@ window.familyChat = window.familyChat || {};
             };
         },
 
+        flushIceCandidates: function() {
+            iceCandidateQueue.forEach(candidate => {
+                familyChat.ws.send(JSON.stringify({
+                    type: 'webrtc_ice_candidate',
+                    target: currentCall,
+                    candidate: candidate
+                }));
+            });
+            iceCandidateQueue = [];
+        },
+
+        handleWebRTC: function(data) {
+            switch (data.type) {
+                case 'webrtc_offer':
+                    this.handleOffer(data);
+                    break;
+                case 'webrtc_answer':
+                    this.handleAnswer(data);
+                    break;
+                case 'webrtc_ice_candidate':
+                    this.handleIceCandidate(data);
+                    break;
+                case 'webrtc_hangup':
+                    this.handleHangup();
+                    break;
+                case 'webrtc_busy':
+                    this.handleBusy();
+                    break;
+                case 'webrtc_reject':
+                    this.handleReject();
+                    break;
+            }
+        },
+
         handleOffer: function(data) {
             if (currentCall) {
                 familyChat.ws.send(JSON.stringify({
@@ -102,7 +142,6 @@ window.familyChat = window.familyChat || {};
             currentCall = data.from;
             familyChat.ui.showIncomingCall(data.from);
 
-            // Автопринятие вызова через 30 секунд
             setTimeout(() => {
                 if (currentCall === data.from) {
                     familyChat.webrtc.acceptCall();
@@ -131,6 +170,7 @@ window.familyChat = window.familyChat || {};
                                 answer: peerConnection.localDescription
                             }));
                             familyChat.ui.showCallInterface(currentCall, false);
+                            this.flushIceCandidates();
                         })
                         .catch(error => {
                             console.error('Ошибка принятия вызова:', error);
@@ -147,6 +187,9 @@ window.familyChat = window.familyChat || {};
             if (!peerConnection || !currentCall) return;
 
             peerConnection.setRemoteDescription(data.answer)
+                .then(() => {
+                    this.flushIceCandidates();
+                })
                 .catch(error => {
                     console.error('Ошибка установки ответа:', error);
                     familyChat.webrtc.endCall();
@@ -199,6 +242,7 @@ window.familyChat = window.familyChat || {};
 
             currentCall = null;
             isInitiator = false;
+            iceCandidateQueue = [];
             familyChat.ui.hideCallInterface();
         },
 
@@ -213,6 +257,5 @@ window.familyChat = window.familyChat || {};
         }
     };
 
-    // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', familyChat.webrtc.init);
 })();
