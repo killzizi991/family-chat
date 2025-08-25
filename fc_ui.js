@@ -344,61 +344,12 @@ window.familyChat = window.familyChat || {};
             const messageInput = document.getElementById('fc_messageInput');
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
-            const settingsButton = document.getElementById('fc_settingsButton');
-            const settingsMenu = document.getElementById('fc_settingsMenu');
-            const changeUsernameForm = document.getElementById('fc_changeUsernameForm');
-            const changeUsernameBtn = document.getElementById('fc_changeUsernameBtn');
-            const changeUsernameCancel = document.getElementById('fc_changeUsernameCancel');
             
             // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
                 collapseSidebar.addEventListener('click', () => {
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.toggle('collapsed');
-                });
-            }
-            
-            // Обработчик для кнопки настроек
-            settingsButton.addEventListener('click', () => {
-                settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
-            });
-            
-            // Обработчик для формы смены имени пользователя
-            if (changeUsernameForm) {
-                changeUsernameBtn.addEventListener('click', () => {
-                    changeUsernameForm.style.display = 'block';
-                });
-                
-                changeUsernameCancel.addEventListener('click', () => {
-                    changeUsernameForm.style.display = 'none';
-                });
-                
-                changeUsernameForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const newUsername = document.getElementById('fc_newUsername').value;
-                    const code = document.getElementById('fc_changeUsernameCode').value;
-                    
-                    const response = await fetch('/api/change-username', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ newUsername, code })
-                    });
-                    
-                    const result = await response.json();
-                    if (result.success) {
-                        familyChat.ui.showNotification('Имя пользователя успешно изменено. Пожалуйста, войдите снова.', 'success');
-                        changeUsernameForm.style.display = 'none';
-                        // Разлогиниваем пользователя
-                        await fetch('/api/logout', { method: 'POST' });
-                        if (familyChat.ws) familyChat.ws.close();
-                        document.getElementById('fc_chatContainer').style.display = 'none';
-                        loginForm.style.display = 'block';
-                        document.getElementById('fc_messages').innerHTML = '';
-                        familyChat.currentUser = null;
-                        familyChat.privateChatsCache = {};
-                    } else {
-                        familyChat.ui.showNotification(`Ошибка: ${result.message}`, 'error');
-                    }
                 });
             }
             
@@ -435,10 +386,6 @@ window.familyChat = window.familyChat || {};
                 
                 const result = await response.json();
                 if (result.success) {
-                    // Автозаполнение формы входа после регистрации
-                    document.getElementById('fc_loginUsername').value = username;
-                    document.getElementById('fc_loginCode').value = code;
-                    
                     familyChat.ui.showNotification('Регистрация успешна! Теперь войдите.', 'success');
                     registerForm.style.display = 'none';
                     loginForm.style.display = 'block';
@@ -490,25 +437,12 @@ window.familyChat = window.familyChat || {};
             document.addEventListener('click', (e) => {
                 const sidebar = document.getElementById('fc_sidebar');
                 const menuToggle = document.getElementById('fc_menuToggle');
-                const settingsButton = document.getElementById('fc_settingsButton');
-                const settingsMenu = document.getElementById('fc_settingsMenu');
-                const changeUsernameForm = document.getElementById('fc_changeUsernameForm');
                 const isMobile = window.innerWidth <= 768;
                 const isDesktopCollapsed = window.innerWidth > 768 && sidebar.classList.contains('collapsed');
                 
                 // Пропускаем клики внутри панели и по кнопке меню
-                if (sidebar.contains(e.target) || e.target === menuToggle || e.target === settingsButton) {
+                if (sidebar.contains(e.target) || e.target === menuToggle) {
                     return;
-                }
-                
-                // Закрываем меню настроек при клике вне его
-                if (settingsMenu.style.display === 'block' && !settingsMenu.contains(e.target)) {
-                    settingsMenu.style.display = 'none';
-                }
-                
-                // Закрываем форму смены имени при клике вне ее
-                if (changeUsernameForm && changeUsernameForm.style.display === 'block' && !changeUsernameForm.contains(e.target)) {
-                    changeUsernameForm.style.display = 'none';
                 }
                 
                 // Для мобильных: закрываем если открыто

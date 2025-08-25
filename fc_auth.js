@@ -133,62 +133,11 @@ function fc_validateSession(sessionId) {
     return fc_activeSessions[sessionId] || null;
 }
 
-function fc_changeUsername(oldUsername, newUsername, code) {
-    if (!fc_registeredUsers[oldUsername]) {
-        return { success: false, message: "Старый пользователь не найден" };
-    }
-    
-    if (fc_registeredUsers[newUsername]) {
-        return { success: false, message: "Новое имя пользователя уже занято" };
-    }
-    
-    if (fc_registeredUsers[oldUsername] !== code) {
-        return { success: false, message: "Неверный код" };
-    }
-    
-    // Обновляем имя в памяти
-    fc_registeredUsers[newUsername] = fc_registeredUsers[oldUsername];
-    delete fc_registeredUsers[oldUsername];
-    
-    // Обновляем активные сессии
-    Object.keys(fc_activeSessions).forEach(sessionId => {
-        if (fc_activeSessions[sessionId] === oldUsername) {
-            fc_activeSessions[sessionId] = newUsername;
-        }
-    });
-    
-    saveAuthData();
-    
-    // Обновляем базу данных
-    db.run(`UPDATE fc_users SET username = ? WHERE username = ?`, [newUsername, oldUsername], (err) => {
-        if (err) console.error("Ошибка обновления имени пользователя:", err);
-    });
-    
-    db.run(`UPDATE fc_messages SET username = ? WHERE username = ?`, [newUsername, oldUsername], (err) => {
-        if (err) console.error("Ошибка обновления сообщений:", err);
-    });
-    
-    db.run(`UPDATE fc_messages SET recipient = ? WHERE recipient = ?`, [newUsername, oldUsername], (err) => {
-        if (err) console.error("Ошибка обновления получателя:", err);
-    });
-    
-    db.run(`UPDATE fc_sessions SET username = ? WHERE username = ?`, [newUsername, oldUsername], (err) => {
-        if (err) console.error("Ошибка обновления сессий:", err);
-    });
-    
-    return { 
-        success: true, 
-        message: "Имя пользователя успешно изменено",
-        username: newUsername
-    };
-}
-
 loadAuthData();
 
 module.exports = {
     fc_registerUser,
     fc_loginUser,
     fc_logoutUser,
-    fc_validateSession,
-    fc_changeUsername
+    fc_validateSession
 };
