@@ -401,9 +401,20 @@ window.familyChat = window.familyChat || {};
                 
                 const result = await response.json();
                 if (result.success) {
-                    familyChat.ui.showNotification('Регистрация успешна! Теперь войдите.', 'success');
-                    registerForm.style.display = 'none';
-                    loginForm.style.display = 'block';
+                    // Очищаем поля формы регистрации
+                    document.getElementById('fc_registerUsername').value = '';
+                    document.getElementById('fc_registerCode').value = '';
+
+                    // Выполняем автоматический вход
+                    familyChat.currentUser = result.username;
+                    document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
+                    familyChat.initWebSocket();
+                    document.getElementById('fc_loginForm').style.display = 'none';
+                    document.getElementById('fc_registerForm').style.display = 'none';
+                    document.getElementById('fc_chatContainer').style.display = 'flex';
+                    document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы подключены к чату</div>';
+                    await familyChat.ui.initChatList();
+                    familyChat.loadChatHistory();
                 } else {
                     familyChat.ui.showNotification(`Ошибка: ${result.message}`, 'error');
                 }

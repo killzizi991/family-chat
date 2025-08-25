@@ -320,6 +320,16 @@ wss.on('connection', (ws, req) => {
 app.post('/api/register', (req, res) => {
     const { username, code } = req.body;
     const result = fc_registerUser(username, code);
+    
+    if (result.success) {
+        res.cookie('fc_session', result.sessionId, {
+            httpOnly: true,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
+            sameSite: 'Lax',
+            secure: false
+        });
+    }
+    
     res.json(result);
 });
 

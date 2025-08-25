@@ -84,11 +84,8 @@ function fc_registerUser(username, code) {
         if (err) console.error("Ошибка добавления пользователя:", err);
     });
     
-    return { 
-        success: true, 
-        message: "Регистрация успешна",
-        username: username
-    };
+    const loginResult = fc_loginUser(username, code);
+    return loginResult;
 }
 
 function fc_loginUser(username, code) {
@@ -108,7 +105,8 @@ function fc_loginUser(username, code) {
     return { 
         success: true, 
         message: "Вход выполнен",
-        sessionId: sessionId
+        sessionId: sessionId,
+        username: username
     };
 }
 
