@@ -1,19 +1,11 @@
 /* Основные стили */
 body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #ffa500;
+    background-color: #ffffff;
     height: 100vh;
     overflow: hidden;
-}
-
-h1 {
-    text-align: center;
-    color: #fff;
-    margin: 0;
-    padding: 10px 0;
-    background-color: #e67e22;
 }
 
 /* Уведомления */
@@ -24,29 +16,30 @@ h1 {
     z-index: 10000;
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 8px;
 }
 
 .notification {
     padding: 12px 16px;
     border-radius: 8px;
     color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     max-width: 280px;
     animation: slideIn 0.3s ease;
     cursor: pointer;
+    font-size: 14px;
 }
 
 .notification.success {
-    background-color: #27ae60;
+    background-color: #4CAF50;
 }
 
 .notification.error {
-    background-color: #e74c3c;
+    background-color: #f44336;
 }
 
 .notification.info {
-    background-color: #3498db;
+    background-color: #FF7F00;
 }
 
 @keyframes slideIn {
@@ -62,51 +55,69 @@ h1 {
 
 /* Формы */
 #fc_loginForm, #fc_registerForm {
-    max-width: 400px;
-    margin: 20px auto;
+    max-width: 100%;
+    margin: 0;
     padding: 20px;
     border: none;
-    border-radius: 12px;
-    background-color: #fff;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 0;
+    background-color: #ffffff;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#fc_loginForm h2, #fc_registerForm h2 {
+    color: #FF7F00;
+    margin-bottom: 24px;
 }
 
 #fc_loginForm label, #fc_registerForm label {
     display: block;
-    margin: 10px 0 5px;
-    color: #7f8c8d;
+    margin: 0 0 8px 0;
+    color: #333;
+    font-weight: 500;
+    width: 100%;
+    max-width: 320px;
 }
 
 #fc_loginForm input, #fc_registerForm input {
     width: 100%;
+    max-width: 320px;
     padding: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #f5f5f5;
+    box-sizing: border-box;
+    font-size: 16px;
 }
 
 #fc_loginForm button, #fc_registerForm button {
     width: 100%;
+    max-width: 320px;
     padding: 12px;
-    background-color: #e67e22;
+    background-color: #FF7F00;
     color: white;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 16px;
+    font-weight: 500;
 }
 
 #fc_loginForm button:hover, #fc_registerForm button:hover {
-    background-color: #d35400;
+    background-color: #E67200;
 }
 
 #fc_loginForm a, #fc_registerForm a {
     display: block;
     text-align: center;
-    margin-top: 15px;
-    color: #e67e22;
+    margin-top: 16px;
+    color: #FF7F00;
     text-decoration: none;
+    width: 100%;
+    max-width: 320px;
 }
 
 /* Контейнер чата */
@@ -120,8 +131,8 @@ h1 {
 
 /* Боковая панель */
 #fc_sidebar {
-    width: 300px;
-    background-color: #fff;
+    width: 320px;
+    background-color: #f8f8f8;
     border-right: 1px solid #e0e0e0;
     display: flex;
     flex-direction: column;
@@ -133,30 +144,30 @@ h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
+    padding: 16px;
     border-bottom: 1px solid #e0e0e0;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
 }
 
 #fc_sidebarHeader h3 {
     margin: 0;
-    font-size: 1.2em;
-    color: #2c3e50;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
 }
 
 .collapse-icon {
     cursor: pointer;
-    font-size: 1.5em;
-    padding: 0 10px;
+    font-size: 18px;
+    padding: 8px;
+    color: #FF7F00;
     display: none;
-    color: #7f8c8d;
 }
 
 #fc_chatsContainer {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 10px;
-    background-color: #fff;
+    padding: 8px;
 }
 
 /* Стили для элементов чата */
@@ -172,16 +183,15 @@ h1 {
 }
 
 .chat-item:hover {
-    background-color: #f5f5f5;
+    background-color: #f0f0f0;
 }
 
 .chat-item.active {
-    background-color: #ffeaa7;
-    font-weight: bold;
+    background-color: #FFE0B2;
 }
 
 .chat-item.new-message {
-    background-color: #fff3cd;
+    background-color: #FFF3E0;
 }
 
 /* Онлайн статус */
@@ -189,14 +199,14 @@ h1 {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #bdc3c7;
+    background-color: #ddd;
     margin-right: 12px;
     transition: background-color 0.3s;
     position: relative;
 }
 
 .online-status.online {
-    background-color: #2ecc71;
+    background-color: #4CAF50;
 }
 
 .online-status.online::after {
@@ -207,7 +217,7 @@ h1 {
     right: -2px;
     bottom: -2px;
     border-radius: 50%;
-    border: 1px solid #2ecc71;
+    border: 1px solid #4CAF50;
     animation: pulse 2s infinite;
 }
 
@@ -232,58 +242,61 @@ h1 {
     display: flex;
     flex-direction: column;
     position: relative;
-    background-color: #f5f5f5;
+    background-color: #ffffff;
 }
 
 /* Заголовок чата */
 #fc_chatHeader {
     display: flex;
     align-items: center;
-    padding: 15px;
-    background-color: #e67e22;
-    border-bottom: 1px solid #d35400;
-    gap: 10px;
+    padding: 12px 16px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    gap: 12px;
 }
 
 #fc_menuToggle {
     display: none;
     background: none;
     border: none;
-    font-size: 1.5em;
+    font-size: 20px;
     cursor: pointer;
-    color: white;
+    color: #FF7F00;
+    padding: 8px;
 }
 
 #fc_chatTitle {
     flex-grow: 1;
-    font-weight: bold;
-    font-size: 1.2em;
-    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
 }
 
 #fc_currentUser {
-    color: #ecf0f1;
+    color: #FF7F00;
+    font-weight: 500;
 }
 
 #fc_logoutButton {
     padding: 8px 16px;
-    background-color: #c0392b;
+    background-color: #FF7F00;
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: 500;
 }
 
 #fc_logoutButton:hover {
-    background-color: #e74c3c;
+    background-color: #E67200;
 }
 
 /* Область сообщений */
 #fc_messages {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 15px;
-    background-color: #f5f5f5;
+    padding: 16px;
+    background-color: #ffffff;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
 }
@@ -291,63 +304,63 @@ h1 {
 /* Стили сообщений */
 .message {
     position: relative;
-    padding: 10px 15px;
+    padding: 8px 12px;
     margin: 8px 0;
-    border-radius: 12px;
-    background-color: #fff;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background-color: #f0f0f0;
     max-width: 80%;
+    word-wrap: break-word;
 }
 
 .own-message {
-    background-color: #ffeaa7;
+    background-color: #FFE0B2;
     margin-left: auto;
-    text-align: right;
 }
 
 .deleted-message {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: #ffebee;
+    color: #c62828;
 }
 
 .username {
-    font-weight: bold;
-    margin-right: 5px;
-    color: #e67e22;
+    font-weight: 600;
+    margin-right: 6px;
+    color: #FF7F00;
 }
 
 .text {
     word-break: break-word;
     overflow-wrap: anywhere;
-    color: #2c3e50;
+    margin: 4px 0;
 }
 
 .edited {
-    font-size: 0.8em;
-    color: #7f8c8d;
+    font-size: 12px;
+    color: #9e9e9e;
     font-style: italic;
-    margin-left: 5px;
+    margin-left: 6px;
 }
 
 .timestamp {
-    display: inline-block;
-    font-size: 0.75em;
-    color: #95a5a6;
-    margin-top: 2px;
+    display: block;
+    font-size: 12px;
+    color: #9e9e9e;
+    text-align: right;
+    margin-top: 4px;
 }
 
 .message-status {
-    margin-left: 5px;
-    font-size: 0.8em;
-    color: #7f8c8d;
+    margin-left: 6px;
+    font-size: 12px;
+    color: #9e9e9e;
 }
 
 /* Область ввода */
 #fc_inputArea {
     display: flex;
     gap: 8px;
-    padding: 15px;
-    background-color: #fff;
+    padding: 16px;
+    background-color: #ffffff;
     border-top: 1px solid #e0e0e0;
     z-index: 900;
     position: relative;
@@ -358,7 +371,12 @@ h1 {
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 24px;
-    background-color: #f5f5f5;
+    font-size: 16px;
+    outline: none;
+}
+
+#fc_messageInput:focus {
+    border-color: #FF7F00;
 }
 
 #fc_sendButton {
@@ -366,32 +384,34 @@ h1 {
     border: none;
     border-radius: 24px;
     cursor: pointer;
-    background-color: #e67e22;
+    background-color: #FF7F00;
     color: white;
-    font-weight: bold;
+    font-weight: 500;
 }
 
 #fc_sendButton:hover {
-    background-color: #d35400;
+    background-color: #E67200;
 }
 
 /* Системные сообщения */
 .system-msg {
-    color: #7f8c8d;
+    color: #9e9e9e;
     font-style: italic;
     text-align: center;
     padding: 8px;
+    font-size: 14px;
 }
 
 .error {
-    color: #e74c3c;
+    color: #f44336;
     text-align: center;
     padding: 8px;
+    font-size: 14px;
 }
 
 /* Кнопки действий */
 .message-actions {
-    margin-top: 5px;
+    margin-top: 4px;
     text-align: right;
 }
 
@@ -399,54 +419,54 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 0.9em;
-    margin-left: 5px;
-    padding: 2px 5px;
-    color: #7f8c8d;
+    font-size: 14px;
+    margin-left: 8px;
+    padding: 4px;
+    color: #9e9e9e;
 }
 
 .edit-btn:hover, .delete-btn:hover {
-    color: #e67e22;
+    color: #FF7F00;
 }
 
 /* Стили для редактирования */
 .edit-container {
     display: flex;
-    gap: 5px;
-    margin-top: 5px;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .edit-input {
     flex-grow: 1;
     padding: 8px;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    background-color: #f5f5f5;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 .edit-save-btn, .edit-cancel-btn {
     padding: 8px 12px;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
+    font-size: 14px;
 }
 
 .edit-save-btn {
-    background-color: #27ae60;
+    background-color: #FF7F00;
     color: white;
 }
 
 .edit-cancel-btn {
-    background-color: #e74c3c;
+    background-color: #9e9e9e;
     color: white;
 }
 
 /* Мобильные стили */
 @media (max-width: 768px) {
     #fc_chatContainer {
-        flex-direction: column !important;
-        height: 100vh !important;
+        flex-direction: column;
+        height: 100vh;
     }
     
     #fc_sidebar {
@@ -458,7 +478,7 @@ h1 {
         max-width: 300px;
         transform: translateX(-100%);
         z-index: 1001;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
     }
     
     #fc_sidebar.active {
@@ -474,14 +494,14 @@ h1 {
     }
     
     #fc_messages {
-        padding: 10px;
+        padding: 12px;
     }
     
     .message {
-        max-width: 90%;
+        max-width: 85%;
     }
     
-    #fc_sidebar.active + #fc_mainChat::after {
+    #fc_sidebar.active ~ #fc_mainChat::before {
         content: '';
         position: fixed;
         top: 0;
@@ -489,7 +509,7 @@ h1 {
         right: 0;
         bottom: 0;
         background: rgba(0,0,0,0.5);
-        z-index: 999;
+        z-index: 1000;
     }
 }
 
@@ -507,4 +527,31 @@ h1 {
     #fc_sidebar.collapsed + #fc_mainChat {
         width: 100%;
     }
+}
+
+/* Дополнительные улучшения */
+.unread-badge {
+    background: #FF7F00 !important;
+    color: white !important;
+    border-radius: 16px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    margin-left: auto !important;
+    padding: 0 6px !important;
+}
+
+.chat-item span:not(.online-status):not(.unread-badge) {
+    margin-left: 8px;
+}
+
+#fc_sidebarHeader {
+    padding: 12px 16px;
+}
+
+#fc_chatsContainer {
+    padding: 8px;
 }
