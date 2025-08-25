@@ -311,12 +311,16 @@ body {
     max-width: 70%;
     word-wrap: break-word;
     align-self: flex-start;
+    width: fit-content;
+    min-width: 50px;
 }
 
 .own-message {
     background-color: #FFE0B2;
     align-self: flex-end;
     margin-left: auto;
+    width: fit-content;
+    min-width: 50px;
 }
 
 .deleted-message {
@@ -504,7 +508,7 @@ body {
         padding-bottom: 68px;
     }
     
-    .message {
+    .message, .own-message {
         max-width: 85%;
     }
     
