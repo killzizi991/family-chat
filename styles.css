@@ -272,6 +272,25 @@ body {
     color: #333;
 }
 
+#fc_currentUser {
+    color: #FF7F00;
+    font-weight: 500;
+}
+
+#fc_logoutButton {
+    padding: 8px 16px;
+    background-color: #FF7F00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+#fc_logoutButton:hover {
+    background-color: #E67200;
+}
+
 /* Область сообщений */
 #fc_messages {
     flex-grow: 1;
