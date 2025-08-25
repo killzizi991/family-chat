@@ -306,14 +306,16 @@ body {
     position: relative;
     padding: 8px 12px;
     margin: 8px 0;
-    border-radius: 8px;
+    border-radius: 12px;
     background-color: #f0f0f0;
-    max-width: 80%;
+    max-width: 70%;
     word-wrap: break-word;
+    align-self: flex-start;
 }
 
 .own-message {
     background-color: #FFE0B2;
+    align-self: flex-end;
     margin-left: auto;
 }
 
