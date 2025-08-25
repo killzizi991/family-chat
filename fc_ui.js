@@ -35,8 +35,13 @@ window.familyChat = window.familyChat || {};
                 statusHTML = `<span class="message-status">✓✓</span>`;
             }
             
+            let usernameHTML = '';
+            if (msg.chatType !== 'private') {
+                usernameHTML = `<span class="username">${msg.username}:</span>`;
+            }
+            
             messageElement.innerHTML = `
-                <span class="username">${msg.username}:</span>
+                ${usernameHTML}
                 <span class="text">${msg.text}</span>
                 ${msg.is_edited ? '<span class="edited">(изменено)</span>' : ''}
                 <span class="timestamp">${familyChat.ui.formatTime(msg.timestamp)}</span>
@@ -135,10 +140,20 @@ window.familyChat = window.familyChat || {};
                 statusHTML = `<span class="message-status">✓✓</span>`;
             }
             
+            let usernameHTML = '';
+            if (data.chatType !== 'private') {
+                usernameHTML = `<span class="username">${data.username}:</span>`;
+            }
+            
+            let editedHTML = '';
+            if (data.is_edited) {
+                editedHTML = '<span class="edited">(изменено)</span>';
+            }
+            
             messageElement.innerHTML = `
-                <span class="username">${data.username}:</span>
+                ${usernameHTML}
                 <span class="text">${data.text}</span>
-                <span class="edited">(изменено)</span>
+                ${editedHTML}
                 <span class="timestamp">${familyChat.ui.formatTime(data.timestamp)}</span>
                 ${statusHTML}
             `;
