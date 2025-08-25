@@ -44,8 +44,10 @@ window.familyChat = window.familyChat || {};
                 ${usernameHTML}
                 <span class="text">${msg.text}</span>
                 ${msg.is_edited ? '<span class="edited">(изменено)</span>' : ''}
-                <span class="timestamp">${familyChat.ui.formatTime(msg.timestamp)}</span>
-                ${statusHTML}
+                <div style="display: flex; align-items: center; margin-top: 2px;">
+                    <span class="timestamp">${familyChat.ui.formatTime(msg.timestamp)}</span>
+                    ${statusHTML}
+                </div>
             `;
             
             if (isCurrentUser && !msg.is_deleted) {
@@ -116,6 +118,18 @@ window.familyChat = window.familyChat || {};
             const btnContainer = document.createElement('div');
             btnContainer.className = 'message-actions';
             
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'action-toggle';
+            toggleBtn.textContent = '⚙️';
+            toggleBtn.onclick = (e) => {
+                e.stopPropagation();
+                const menu = btnContainer.querySelector('.action-menu');
+                menu.classList.toggle('show');
+            };
+            
+            const menu = document.createElement('div');
+            menu.className = 'action-menu';
+            
             const editBtn = document.createElement('button');
             editBtn.className = 'edit-btn';
             editBtn.textContent = '✏️';
@@ -126,9 +140,19 @@ window.familyChat = window.familyChat || {};
             deleteBtn.textContent = '🗑️';
             deleteBtn.onclick = () => familyChat.ui.deleteOwnMessage(messageElement.id, messageId);
             
-            btnContainer.appendChild(editBtn);
-            btnContainer.appendChild(deleteBtn);
+            menu.appendChild(editBtn);
+            menu.appendChild(deleteBtn);
+            btnContainer.appendChild(toggleBtn);
+            btnContainer.appendChild(menu);
             messageElement.appendChild(btnContainer);
+            
+            // Закрытие меню при клике вне его
+            document.addEventListener('click', function closeMenu(e) {
+                if (!btnContainer.contains(e.target)) {
+                    menu.classList.remove('show');
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
         },
         
         updateMessage: function(data) {
@@ -154,8 +178,10 @@ window.familyChat = window.familyChat || {};
                 ${usernameHTML}
                 <span class="text">${data.text}</span>
                 ${editedHTML}
-                <span class="timestamp">${familyChat.ui.formatTime(data.timestamp)}</span>
-                ${statusHTML}
+                <div style="display: flex; align-items: center; margin-top: 2px;">
+                    <span class="timestamp">${familyChat.ui.formatTime(data.timestamp)}</span>
+                    ${statusHTML}
+                </div>
             `;
             
             if (data.username === familyChat.currentUser) {
@@ -175,7 +201,7 @@ window.familyChat = window.familyChat || {};
                         const newStatus = document.createElement('span');
                         newStatus.className = 'message-status';
                         newStatus.textContent = '✓✓';
-                        element.appendChild(newStatus);
+                        element.querySelector('div').appendChild(newStatus);
                     }
                 });
             }
