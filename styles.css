@@ -262,6 +262,7 @@ body {
     cursor: pointer;
     color: #FF7F00;
     padding: 8px;
+    display: block;
 }
 
 #fc_chatTitle {
@@ -485,12 +486,20 @@ body {
     }
     
     #fc_inputArea {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
         padding: 12px;
         padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+        background-color: #ffffff;
+        border-top: 1px solid #e0e0e0;
+        z-index: 1000;
     }
     
     #fc_messages {
         padding: 12px;
+        padding-bottom: 68px;
     }
     
     .message {
@@ -512,7 +521,7 @@ body {
 /* Стили для ПК */
 @media (min-width: 769px) {
     .collapse-icon {
-        display: block;
+        display: none;
     }
     
     #fc_sidebar.collapsed {
