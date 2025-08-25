@@ -403,8 +403,10 @@ window.familyChat = window.familyChat || {};
                     settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
                 });
                 
-                document.addEventListener('click', function() {
-                    settingsMenu.style.display = 'none';
+                document.addEventListener('click', function(e) {
+                    if (!settingsToggle.contains(e.target) && !settingsMenu.contains(e.target)) {
+                        settingsMenu.style.display = 'none';
+                    }
                 });
                 
                 settingsMenu.addEventListener('click', function(e) {
