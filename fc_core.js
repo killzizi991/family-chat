@@ -25,24 +25,19 @@ window.familyChat = {
         console.log("Ядро чата загружено!");
         
         familyChat.checkSession = async function() {
-            try {
-                const response = await fetch('/api/check-session');
-                const result = await response.json();
-                
-                if (result.loggedIn) {
-                    familyChat.currentUser = result.username;
-                    document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
-                    familyChat.initWebSocket();
-                    document.getElementById('fc_loginForm').style.display = 'none';
-                    document.getElementById('fc_registerForm').style.display = 'none';
-                    document.getElementById('fc_chatContainer').style.display = 'flex';
-                    document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы вошли как ' + familyChat.currentUser + '</div>';
-                    await familyChat.ui.initChatList();
-                    familyChat.loadChatHistory();
-                }
-            } catch (error) {
-                console.error('Ошибка проверки сессии:', error);
-                // При ошибке не меняем состояние интерфейса
+            const response = await fetch('/api/check-session');
+            const result = await response.json();
+            
+            if (result.loggedIn) {
+                familyChat.currentUser = result.username;
+                document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
+                familyChat.initWebSocket();
+                document.getElementById('fc_loginForm').style.display = 'none';
+                document.getElementById('fc_registerForm').style.display = 'none';
+                document.getElementById('fc_chatContainer').style.display = 'flex';
+                document.getElementById('fc_messages').innerHTML += '<div class="system-msg">Вы вошли как ' + familyChat.currentUser + '</div>';
+                await familyChat.ui.initChatList();
+                familyChat.loadChatHistory();
             }
         };
         

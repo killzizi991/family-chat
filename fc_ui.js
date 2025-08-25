@@ -385,32 +385,12 @@ window.familyChat = window.familyChat || {};
             const messageInput = document.getElementById('fc_messageInput');
             const menuToggle = document.getElementById('fc_menuToggle');
             const collapseSidebar = document.getElementById('fc_collapseSidebar');
-            const settingsToggle = document.getElementById('fc_settingsToggle');
-            const settingsMenu = document.getElementById('fc_settingsMenu');
             
             // Обработчик для сворачивания боковой панели на ПК
             if (collapseSidebar) {
                 collapseSidebar.addEventListener('click', () => {
                     const sidebar = document.getElementById('fc_sidebar');
                     sidebar.classList.toggle('collapsed');
-                });
-            }
-            
-            // Обработчик для кнопки настроек
-            if (settingsToggle && settingsMenu) {
-                settingsToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    settingsMenu.style.display = settingsMenu.style.display === 'block' ? 'none' : 'block';
-                });
-                
-                document.addEventListener('click', function(e) {
-                    if (!settingsToggle.contains(e.target) && !settingsMenu.contains(e.target)) {
-                        settingsMenu.style.display = 'none';
-                    }
-                });
-                
-                settingsMenu.addEventListener('click', function(e) {
-                    e.stopPropagation();
                 });
             }
             
@@ -453,6 +433,7 @@ window.familyChat = window.familyChat || {};
 
                     // Выполняем автоматический вход
                     familyChat.currentUser = result.username;
+                    document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
                     familyChat.initWebSocket();
                     document.getElementById('fc_loginForm').style.display = 'none';
                     document.getElementById('fc_registerForm').style.display = 'none';
@@ -552,6 +533,7 @@ window.familyChat = window.familyChat || {};
                 const result = await response.json();
                 if (result.success) {
                     familyChat.currentUser = username;
+                    document.getElementById('fc_currentUser').textContent = familyChat.currentUser;
                     familyChat.initWebSocket();
                     document.getElementById('fc_loginForm').style.display = 'none';
                     document.getElementById('fc_registerForm').style.display = 'none';
