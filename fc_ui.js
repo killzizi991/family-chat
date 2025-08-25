@@ -429,8 +429,14 @@ window.familyChat = window.familyChat || {};
             });
             
             menuToggle.addEventListener('click', () => {
+                const isMobile = window.innerWidth <= 768;
                 const sidebar = document.getElementById('fc_sidebar');
-                sidebar.classList.toggle('active');
+                
+                if (isMobile) {
+                    sidebar.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                }
             });
             
             // Закрытие меню при клике вне его области

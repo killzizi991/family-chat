@@ -256,7 +256,6 @@ body {
 }
 
 #fc_menuToggle {
-    display: none;
     background: none;
     border: none;
     font-size: 20px;
@@ -485,12 +484,9 @@ body {
         transform: translateX(0);
     }
     
-    #fc_menuToggle {
-        display: block;
-    }
-    
     #fc_inputArea {
         padding: 12px;
+        padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
     }
     
     #fc_messages {
