@@ -42,7 +42,11 @@
         <div id="fc_sidebar" class="active">
             <div id="fc_sidebarHeader">
                 <h3>Чаты</h3>
+                <div id="fc_settingsToggle">⚙️</div>
                 <span id="fc_collapseSidebar" class="collapse-icon">←</span>
+            </div>
+            <div id="fc_settingsMenu" style="display: none;">
+                <button id="fc_logoutButton">Выйти</button>
             </div>
             <div id="fc_chatsContainer">
                 <!-- Чаты будут загружены динамически -->
@@ -54,7 +58,6 @@
                 <button id="fc_menuToggle">☰</button>
                 <span id="fc_chatTitle">Выберите чат</span>
                 <span>Вы вошли как: <span id="fc_currentUser"></span></span>
-                <button id="fc_logoutButton">Выйти</button>
             </div>
             
             <div id="fc_messages">
